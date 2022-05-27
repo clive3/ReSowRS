@@ -1,0 +1,3 @@
+filename	2019-07-03-14-39-35_S2_SaltWihistBayTraining_10m.tif
+acc_georef	1
+epsg	32620

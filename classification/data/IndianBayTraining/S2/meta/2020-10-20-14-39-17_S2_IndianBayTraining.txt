@@ -1,0 +1,3 @@
+filename	2020-10-20-14-39-17_S2_IndianBayTraining_10m.tif
+acc_georef	1
+epsg	32620

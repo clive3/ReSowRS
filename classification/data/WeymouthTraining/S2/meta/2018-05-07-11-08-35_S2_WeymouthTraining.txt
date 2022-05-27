@@ -1,0 +1,3 @@
+filename	2018-05-07-11-08-35_S2_WeymouthTraining_10m.tif
+acc_georef	1
+epsg	32630

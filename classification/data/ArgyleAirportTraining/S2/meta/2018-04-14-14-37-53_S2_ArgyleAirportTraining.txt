@@ -1,0 +1,3 @@
+filename	2018-04-14-14-37-53_S2_ArgyleAirportTraining_10m.tif
+acc_georef	1
+epsg	32620
