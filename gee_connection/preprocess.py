@@ -7,7 +7,7 @@ import sklearn.decomposition as decomposition
 from utils.print_utils import printProgress, printWarning, printError
 
 
-def preprocess_optical(file_paths, pansharpen, SWIR_band, SWIR_index):
+def preprocess_optical(file_paths, pansharpen, NIR_index):
 
     # read 10m bands (R,G,B,NIR)
     file_path_10 = file_paths[0]
@@ -38,7 +38,7 @@ def preprocess_optical(file_paths, pansharpen, SWIR_band, SWIR_index):
 
         printProgress(f'pansharpening SWIR')
 
-        image_NIR = image_10[:,:,3]
+        image_NIR = image_10[:,:,NIR_index]
         image_20m = pansharpen_SWIR(image_20m, image_NIR)
 
 #    image_SWIR = image_20m[:, :, SWIR_index]
