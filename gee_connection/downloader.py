@@ -89,7 +89,10 @@ def download_GEE_image(image, scale, region, file_path, bands):
 
 def makeDirectories(base_directory):
 
-    directory_names = ['meta', '10m', '20m']
+    directory_names = ['meta']
+
+    for key in BAND_DICT.keys():
+        directory_names.append(key)
 
     directory_paths = []
     for directory_name in directory_names:
@@ -137,7 +140,7 @@ def getMedianImage(region, dates):
     if MASK_LAND:
         image_median = S2SRwithCloudMask.map(maskClouds).map(maskLand).median()
     else:
-        image_median = S2SRwithCloudMask.map(maskClouds).mean()
+        image_median = S2SRwithCloudMask.map(maskClouds).median()
 
     return image_median, number_images
 
