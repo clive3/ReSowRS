@@ -12,7 +12,7 @@ from global_parameters import EPSG, BAND_DICT, MAX_CLOUD_PROBABILITY, \
     NIR_LAND_THRESH, MASK_LAND
 
 
-def getS2GEEImage(site_name, roi, dates, median_dir_path):
+def getMedianS2GEEImage(site_name, roi, dates, median_dir_path):
 
     date_start, date_end = dates[0], dates[1]
 
