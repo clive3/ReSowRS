@@ -1,11 +1,17 @@
+import os
 import numpy as np
 from osgeo import gdal
 
 import skimage.transform as transform
 import sklearn.decomposition as decomposition
+from skimage.morphology import remove_small_objects, remove_small_holes, \
+    disk, erosion
 
 from utils.print_utils import printProgress, printWarning, printError
 
+from utils.name_utils import hansenFilePath, seaMaksFilePath
+
+from global_parameters import SMALL_OBJECT_SIZE
 
 def preprocess_optical(file_paths, pansharpen, NIR_index):
 
@@ -116,6 +122,26 @@ def hist_match(source, template):
     return interp_t_values[bin_idx].reshape(oldshape)
 
 
+def readGeotiff(image_file_path):
+
+    ## import the input file and its geometry
+    image_dataset_gdal = gdal.Open(image_file_path, gdal.GA_ReadOnly)
+    if image_dataset_gdal:
+
+        projection = image_dataset_gdal.GetProjectionRef()
+        geotransform = image_dataset_gdal.GetGeoTransform()
+        image_array_np = image_dataset_gdal.ReadAsArray()
+
+        if len(image_array_np.shape) == 2:
+            image_array_np = np.expand_dims(image_array_np, axis=0)
+
+    else:
+        printWarning(f'image file could not be read: {image_file_path}')
+        image_array_np = projection = geotransform = None
+
+    return image_array_np, (projection, geotransform)
+
+
 def writeGeotiff(image_array_np, output_file_path, image_geometry):
 
     driver = gdal.GetDriverByName('GTiff')
@@ -148,3 +174,29 @@ def writeGeotiff(image_array_np, output_file_path, image_geometry):
 
         output_ds.FlushCache()
         output_ds = None
+
+
+def createSeaMask(median_dir_path, site_name):
+
+    hansen_np, geometry = readGeotiff(hansenFilePath(median_dir_path, site_name))
+    hansen_np = np.squeeze(hansen_np)
+
+    water_mask_np = np.where(hansen_np == 1, 0, 1)
+    water_mask_np = remove_small_holes(remove_small_objects(water_mask_np, SMALL_OBJECT_SIZE),
+                                       SMALL_OBJECT_SIZE)
+
+    land_mask_np = np.where(water_mask_np == 0, 1, 0)
+
+    footprint = disk(100)
+    water_mask_np = erosion(water_mask_np, footprint)
+    sea_mask_file_path = seaMaksFilePath(median_dir_path, site_name)
+    writeGeotiff(water_mask_np, sea_mask_file_path, geometry)
+
+    land_mask_file_path = sea_mask_file_path.replace('sea', 'land')
+    writeGeotiff(land_mask_np, land_mask_file_path, geometry)
+
+
+def applySeaMask(median_dir_path):
+
+    sea_mask_np, geaometry = readGeotiff(os.path.join(seaMaksFilePath(median_dir_path)))
+

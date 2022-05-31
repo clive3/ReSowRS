@@ -6,7 +6,7 @@ import zipfile
 from urllib.request import urlretrieve
 
 from utils.print_utils import printProgress, printSuccess
-from utils.name_utils import geotifFileName, pickleDumpName
+from utils.name_utils import geotifFileName, pickleDumpName, hansenFilePath
 
 from global_parameters import EPSG, BAND_DICT, MAX_CLOUD_PROBABILITY, \
     NIR_LAND_THRESH, MASK_LAND
@@ -28,6 +28,8 @@ def getMedianS2GEEImage(site_name, roi, dates, median_dir_path):
 
     image_median, median_number = getMedianImage(region, dates)
 
+    local_data = os.path.join(median_dir_path, 'data.tif')
+
     image_filenames = {}
     for band_key in BAND_DICT.keys():
         image_filenames[band_key] = geotifFileName(site_name, date_start, date_end, band_key)
@@ -46,7 +48,7 @@ def getMedianS2GEEImage(site_name, roi, dates, median_dir_path):
         download_GEE_image(image=image_median,
                            scale=ee.Number(band_scale),
                            region=region,
-                           file_path=band_directory_path,
+                           directory_path=band_directory_path,
                            bands=band_names)
 
         try:
@@ -55,7 +57,11 @@ def getMedianS2GEEImage(site_name, roi, dates, median_dir_path):
             os.remove(local_file_path)
             os.rename(local_data, local_file_path)
 
-    base_file_name = image_file_name.replace('_'+band_key+'.tif', '')
+    if not MASK_LAND:
+        base_file_name = image_file_name.replace('_'+band_key+'.tif', '')
+    else:
+        base_file_name = image_file_name.replace('_'+band_key+'.tif', '')
+
     txt_file_name = base_file_name + '.txt'
 
     metadata_dict = {'file_name': base_file_name,
@@ -71,8 +77,23 @@ def getMedianS2GEEImage(site_name, roi, dates, median_dir_path):
     printProgress('GEE connection closed')
     printSuccess('median image downloaded')
 
+    local_data = os.path.join(median_dir_path, 'data.tif')
+    hansen_file_path = hansenFilePath(median_dir_path, site_name)
+    download_GEE_image(image=ee.Image('UMD/hansen/global_forest_change_2015'),
+                       scale=ee.Number(10),
+                       region=region,
+                       directory_path=median_dir_path,
+                       bands='datamask')
 
-def download_GEE_image(image, scale, region, file_path, bands):
+    try:
+        os.rename(local_data, hansen_file_path)
+    except:  # overwrite if already exists
+        os.remove(hansen_file_path)
+        os.rename(local_data, hansen_file_path)
+    printSuccess('hansen2015 downloaded')
+
+
+def download_GEE_image(image, scale, region, directory_path, bands):
 
     path = image.getDownloadURL({
         'name': 'data',
@@ -84,7 +105,7 @@ def download_GEE_image(image, scale, region, file_path, bands):
 
     local_zip, headers = urlretrieve(path)
     with zipfile.ZipFile(local_zip) as local_zipfile:
-        return local_zipfile.extractall(path=str(file_path))
+        return local_zipfile.extractall(path=str(directory_path))
 
 
 def makeDirectories(base_directory):
@@ -118,6 +139,7 @@ def getMedianImage(region, dates):
         isNotLand = NIR.lt(NIR_LAND_THRESH*1000)
 
         return img.updateMask(isNotLand)
+
 
     S2SR_col = ee.ImageCollection('COPERNICUS/S2_SR')\
                                     .filterBounds(region)\
@@ -180,7 +202,7 @@ def save_metadata(site_name, median_dir_path):
         metadata[sat_name]['number_images'].append(number_images)
 
     # save a .pkl file containing the metadata dict
-    metadata_file_name = pickleDumpName('metadata', site_name, sat_name)
+    metadata_file_name = pickleDumpName('metadata', site_name)
     with open(os.path.join(median_dir_path, metadata_file_name), 'wb') as f:
         pickle.dump(metadata, f)
 
@@ -193,7 +215,7 @@ def load_metadata(site_name, median_dir_path, dates):
     date_start = dates[0]
     date_end = dates[1]
 
-    metadata_file_name = pickleDumpName('metadata', site_name, sat_name)
+    metadata_file_name = pickleDumpName('metadata', site_name)
     with open(os.path.join(median_dir_path,  metadata_file_name), 'rb') as f:
         metadata_dict = pickle.load(f)
 

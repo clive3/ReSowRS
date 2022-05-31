@@ -9,6 +9,7 @@ EPSG = 22770
 NIR_LAND_THRESH = 0.03
 MAX_CLOUD_PROBABILITY = 50
 MASK_LAND = False
+SMALL_OBJECT_SIZE = 1000
 
 #BAND_DICT = {'10m': [['B2', 'B3', 'B4', 'B8'], 10],
 #              '20m': [['B5', 'B6', 'B7', 'B8A', 'B11', 'B12'], 20],
@@ -19,5 +20,8 @@ BAND_DICT = {'10m': [['B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B11', 'B12'], 1
 
 #BAND_DICT = {'10m': [['B2', 'B3', 'B8'], 10],
 #             '20m': [['B6', 'B7', 'B12'], 20]}
+
+#BAND_DICT = {'10m': [['B2', 'B3', 'B4', 'B8'], 10],
+#             '20m': [['B5', 'B6', 'B7', 'B11', 'B12'], 20]}
 
 SWIR = 'B12'
