@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e6c67b43-afcb-4856-bd93-bd0973f727d8" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/envs/resow.yml" beforeDir="false" afterPath="$PROJECT_DIR$/envs/resow.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/regions.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/regions.ipynb" afterDir="false" />
     </list>
