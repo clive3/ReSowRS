@@ -7,7 +7,7 @@ dependencies:
   - gdal=2.3.3
   - geojson
   - geopandas=0.4.1
-  - jupyter=4.10.0
+  - jupyter=1.0.0
   - matplotlib=3.3.2
   - numpy=1.16.3
   - pandas=0.24.2
