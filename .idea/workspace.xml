@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="e6c67b43-afcb-4856-bd93-bd0973f727d8" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/hexgenerator.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/hexgenerator.ipynb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -55,9 +54,13 @@
     <servers />
   </component>
   <component name="WindowStateProjectService">
-    <state x="299" y="29" key="SettingsEditor" timestamp="1653491617048">
+    <state x="597" y="167" key="FileChooserDialogImpl" timestamp="1655072693379">
       <screen x="0" y="0" width="1739" height="939" />
     </state>
-    <state x="299" y="29" key="SettingsEditor/0.0.1739.939@0.0.1739.939" timestamp="1653491617048" />
+    <state x="597" y="167" key="FileChooserDialogImpl/0.0.1739.939@0.0.1739.939" timestamp="1655072693379" />
+    <state x="299" y="29" key="SettingsEditor" timestamp="1655072775039">
+      <screen x="0" y="0" width="1739" height="939" />
+    </state>
+    <state x="299" y="29" key="SettingsEditor/0.0.1739.939@0.0.1739.939" timestamp="1655072775039" />
   </component>
 </project>
