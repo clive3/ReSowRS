@@ -18,7 +18,8 @@ using optical satellite data to classify seagrass in UK
    :maxdepth: 2
    :caption: Contents:
 
-
+   getting_started
+   code
 
 Indices and tables
 ==================

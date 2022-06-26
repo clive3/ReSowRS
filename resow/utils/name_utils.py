@@ -6,8 +6,6 @@ Created on Tue Jul 16 09:35:46 2019coast.coast_params
 """
 import os
 
-from global_parameters import MASK_LAND
-
 
 def geotifFileName(site_name, date_start, date_end, band_key):
 
