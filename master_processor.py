@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os
 import sys
+import ast
 
 from resow.utils import reader_utils
 from resow.utils.print_utils import printError, printProgress
@@ -20,16 +21,16 @@ class RESOWRS(object):
         :type config_file: ``str``
         """
 
-        self.configuration = reader_utils._readConfig(self.CONFIG_FILE)
+        self.configuration = reader_utils._readConfig(config_file)
         self.data_partition = self.configuration['DIRECTORY PATHS']['data partition']
-        self.roi = self.configuration['ROI']
-        self.dates = self.configuration['dates']
-
-        self.EPSG = self.configuration['EPSG']
-        self.BAND_DICT = self.configuration['BAND_DICT']
-        self.MAX_CLOUD_PROBABILITY = self.configuration['MAX_CLOUD_PROBABILITY']
-        self.NIR_LAND_THRESH = self.configuration['NIR_LAND_THRESH']
-        self.MASK_LAND = self.configuration['MASK_LAND']
+        self.roi = self.configuration['SETTINGS']['ROI']
+        self.dates = ast.literal_eval(self.configuration['SETTINGS']['dates'])
+        self.EPSG = self.configuration['SETTINGS']['EPSG']
+        self.BAND_DICT = ast.literal_eval(self.configuration['SETTINGS']['BAND_DICT'])
+        self.MAX_CLOUD_PROBABILITY = ast.literal_eval(self.configuration['SETTINGS']['MAX_CLOUD_PROBABILITY'])
+        self.NIR_LAND_THRESH = ast.literal_eval(self.configuration['SETTINGS']['NIR_LAND_THRESH'])
+        self.MASK_LAND = ast.literal_eval(self.configuration['SETTINGS']['MASK_LAND'])
+        self.SMALL_OBJECT_SIZE = ast.literal_eval(self.configuration['SETTINGS']['SMALL_OBJECT_SIZE'])
 
     def run(self):
         """The run method to control all workflow.
@@ -51,16 +52,18 @@ class RESOWRS(object):
             median_dir_path = os.path.join(self.data_partition, site_name, 'median')
 
             for date_pair in self.dates:
+
                 printProgress(f'processing {site_name}: {date_pair}')
                 printProgress('')
 
-                downloader.getMedianS2GEEImage(site_name, self.roi, self.dates,
-                                               median_dir_path, self.EPSG, \
-                                                self.BAND_DICT, self.MASK_LAND)
+                downloader.getMedianS2GEEImage(site_name, roi_polygon, date_pair,
+                                               median_dir_path, self.EPSG, self.BAND_DICT,
+                                               self.MASK_LAND, self.NIR_LAND_THRESH,
+                                               self.MAX_CLOUD_PROBABILITY)
 
             downloader.save_metadata(site_name, median_dir_path)
 
-            preprocess.createSeaMask(median_dir_path, site_name)
+            preprocess.createSeaMask(median_dir_path, site_name, self.SMALL_OBJECT_SIZE)
 
 
 

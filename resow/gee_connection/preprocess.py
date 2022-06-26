@@ -7,11 +7,10 @@ import sklearn.decomposition as decomposition
 from skimage.morphology import remove_small_objects, remove_small_holes, \
     disk, erosion
 
-from resow.utils import printProgress, printWarning, printError
+from resow.utils.print_utils import printProgress, printWarning, printError
 
-from resow.utils import hansenFilePath, seaMaksFilePath
+from resow.utils.name_utils import hansenFilePath, seaMaksFilePath
 
-from global_parameters import SMALL_OBJECT_SIZE
 
 def preprocess_optical(file_paths, pansharpen, NIR_index):
 
@@ -176,7 +175,7 @@ def writeGeotiff(image_array_np, output_file_path, image_geometry):
         output_ds = None
 
 
-def createSeaMask(median_dir_path, site_name):
+def createSeaMask(median_dir_path, site_name, SMALL_OBJECT_SIZE):
 
     hansen_np, geometry = readGeotiff(hansenFilePath(median_dir_path, site_name))
     hansen_np = np.squeeze(hansen_np)
@@ -198,5 +197,5 @@ def createSeaMask(median_dir_path, site_name):
 
 def applySeaMask(median_dir_path):
 
-    sea_mask_np, geaometry = readGeotiff(os.path.join(seaMaksFilePath(median_dir_path)))
+    sea_mask_np, geometry = readGeotiff(os.path.join(seaMaksFilePath(median_dir_path)))
 

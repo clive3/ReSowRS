@@ -5,18 +5,19 @@ import zipfile
 
 from urllib.request import urlretrieve
 
-from resow.utils.print_utils import printProgress, printSuccess
+from resow.utils.print_utils import printProgress, printSuccess, printError
 from resow.utils.name_utils import geotifFileName, pickleDumpName, hansenFilePath
 
 
-def getMedianS2GEEImage(site_name, roi, dates, median_dir_path, EPSG, \
-                        BAND_DICT, MASK_LAND):
+def getMedianS2GEEImage(site_name, roi, dates, median_dir_path, EPSG,
+                        BAND_DICT, MASK_LAND, NIR_LAND_THRESH,
+                        MAX_CLOUD_PROBABILITY):
 
     date_start, date_end = dates[0], dates[1]
 
     if not os.path.exists(median_dir_path):
         os.makedirs(median_dir_path)
-    directory_path_list = makeDirectories(median_dir_path)
+    directory_path_list = makeDirectories(median_dir_path, BAND_DICT)
 
     ee.Initialize()
     printProgress('connected to GEE')
@@ -24,7 +25,7 @@ def getMedianS2GEEImage(site_name, roi, dates, median_dir_path, EPSG, \
     region = ee.Geometry.Polygon(roi)
 #    region = ee.Geometry.Point(roi).buffer(2000)
 
-    image_median, median_number = getMedianImage(region, dates)
+    image_median, median_number = getMedianImage(region, dates, MASK_LAND, NIR_LAND_THRESH, MAX_CLOUD_PROBABILITY)
 
     local_data = os.path.join(median_dir_path, 'data.tif')
 
@@ -106,7 +107,7 @@ def download_GEE_image(image, scale, region, directory_path, bands):
         return local_zipfile.extractall(path=str(directory_path))
 
 
-def makeDirectories(base_directory):
+def makeDirectories(base_directory, BAND_DICT):
 
     directory_names = ['meta']
 
@@ -122,7 +123,7 @@ def makeDirectories(base_directory):
     return directory_paths
 
 
-def getMedianImage(region, dates):
+def getMedianImage(region, dates, MASK_LAND, NIR_LAND_THRESH, MAX_CLOUD_PROBABILITY):
 
     def maskClouds(img):
 
