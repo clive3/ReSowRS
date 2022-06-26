@@ -2,7 +2,7 @@
 import os
 import sys
 
-from resow.utils import readers
+from resow.utils import reader_utils
 
 class RESOW(object):
     """RESOW class - includes a ``run()`` method to control workflow.
@@ -40,12 +40,7 @@ class RESOW(object):
         """The run method to control all workflow.
         """
 
-        self.configuration = readers._readConfig(self.CONFIG_FILE)
-        DIRECTORY_PATHS = self.configuration['DIRECTORY PATHS']
-        DATA_DIR = DIRECTORY_PATHS['data']
-
-        CAMPAIGNS = self.configuration['CAMPAIGNS']
-        OSCAR_DIR = os.path.join(DATA_DIR, CAMPAIGNS['first'])
+        self.configuration = reader_utils._readConfig(self.CONFIG_FILE)
 
         # the example_method shows how self can use used
         # by creating the results directory if it doesn't exist
