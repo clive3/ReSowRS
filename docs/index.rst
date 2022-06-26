@@ -5,7 +5,7 @@ ReSowRS documenation
 .. image:: images/logo.jpg
     :width: 400px
     :align: center
-    :height: 300px
+    :height: 110px
     :alt: starfish
 
 |
