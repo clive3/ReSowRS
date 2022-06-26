@@ -6,19 +6,27 @@ seastar.utils package
 submodules
 ----------
 
-resow.utils.readers module
---------------------------
+resow.utils.reader_utils module
+-------------------------------
 **This module contains functions to interact with the file system.**
 
 .. automodule:: resow.utils.reader_utils
    :members:
+   :private-members:
 
-
-seastar.utils.tools module
---------------------------
+resow.utils.name_utils module
+-----------------------------
 **This module contains helper functions for wind and currents.**
 
-.. automodule:: seastar.utils.tools
+.. automodule:: resow.utils.name_utils
+   :members:
+   :private-members:
+
+resow.utils.print_utils module
+------------------------------
+**This module contains helper functions for wind and currents.**
+
+.. automodule:: resow.utils.print_utils
    :members:
    :private-members:
 

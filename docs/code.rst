@@ -14,10 +14,10 @@ the command line and requires a local configuration file:**
 
 .. sourcecode:: python
 
-    obj = RESOW('seastarx_config.ini')
+    obj = RESOW('resow_config.ini')
     obj.run()
 
-**SEASTARX class**
+**RESOWRS class**
 
 .. automodule:: master_processor
    :members:
