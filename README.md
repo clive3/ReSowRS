@@ -21,11 +21,11 @@ Open the Anaconda prompt (in Mac and Linux, open a terminal window) and use the 
 Create a new environment named `resow` with all the required packages and activate this environment by entering the following commands:
 
 ```
->>> conda create --file env/environment.yml
+>>> conda env create --file env/environment.yml
 >>> conda activate resow
 ```
 
-To confirm that you have successfully activated `resow`, your terminal command line prompt should now start with `(resow)`.
+If your terminal command line prompt now starts with `(resow)` you have succeeded.
 
 
 ## 2. Running the code
