@@ -1,10 +1,18 @@
-.. ReSowRS documentation master file, created by
-   sphinx-quickstart on Sun Jun 26 21:14:28 2022.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+""""""""""""""""""""
+ReSowRS documenation
+""""""""""""""""""""
 
-Welcome to ReSowRS's documentation!
-===================================
+.. image:: images/logo.jpg
+    :width: 400px
+    :align: center
+    :height: 300px
+    :alt: starfish
+
+|
+
+.......................................................
+using optical satellite data to classify seagrass in UK
+.......................................................
 
 .. toctree::
    :maxdepth: 2
