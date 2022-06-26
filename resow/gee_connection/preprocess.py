@@ -7,9 +7,9 @@ import sklearn.decomposition as decomposition
 from skimage.morphology import remove_small_objects, remove_small_holes, \
     disk, erosion
 
-from utils.print_utils import printProgress, printWarning, printError
+from resow.utils import printProgress, printWarning, printError
 
-from utils.name_utils import hansenFilePath, seaMaksFilePath
+from resow.utils import hansenFilePath, seaMaksFilePath
 
 from global_parameters import SMALL_OBJECT_SIZE
 

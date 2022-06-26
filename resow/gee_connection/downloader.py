@@ -5,8 +5,8 @@ import zipfile
 
 from urllib.request import urlretrieve
 
-from utils.print_utils import printProgress, printSuccess
-from utils.name_utils import geotifFileName, pickleDumpName, hansenFilePath
+from resow.utils import printProgress, printSuccess
+from resow.utils import geotifFileName, pickleDumpName, hansenFilePath
 
 from global_parameters import EPSG, BAND_DICT, MAX_CLOUD_PROBABILITY, \
     NIR_LAND_THRESH, MASK_LAND
