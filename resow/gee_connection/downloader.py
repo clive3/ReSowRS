@@ -5,14 +5,12 @@ import zipfile
 
 from urllib.request import urlretrieve
 
-from resow.utils import printProgress, printSuccess
-from resow.utils import geotifFileName, pickleDumpName, hansenFilePath
-
-from global_parameters import EPSG, BAND_DICT, MAX_CLOUD_PROBABILITY, \
-    NIR_LAND_THRESH, MASK_LAND
+from resow.utils.print_utils import printProgress, printSuccess
+from resow.utils.name_utils import geotifFileName, pickleDumpName, hansenFilePath
 
 
-def getMedianS2GEEImage(site_name, roi, dates, median_dir_path):
+def getMedianS2GEEImage(site_name, roi, dates, median_dir_path, EPSG, \
+                        BAND_DICT, MASK_LAND):
 
     date_start, date_end = dates[0], dates[1]
 
