@@ -9,7 +9,6 @@ from resow.utils.print_utils import printError, printProgress
 from resow.gee_connection import downloader, preprocess,  tools
 
 
-
 class RESOWRS(object):
     """RESOW class - includes a ``run()`` method to control workflow.
     """
@@ -64,9 +63,6 @@ class RESOWRS(object):
             downloader.save_metadata(site_name, median_dir_path)
 
             preprocess.createSeaMask(median_dir_path, site_name, self.SMALL_OBJECT_SIZE)
-
-
-
 
 
 if __name__ == '__main__':
