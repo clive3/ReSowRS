@@ -3,6 +3,11 @@ import os
 import sys
 
 from resow.utils import reader_utils
+from resow.utils.print_utils import printError, printProgress
+
+from resow.gee_connection import downloader, preprocess,  tools
+
+
 
 class RESOWRS(object):
     """RESOW class - includes a ``run()`` method to control workflow.
@@ -15,37 +20,50 @@ class RESOWRS(object):
         :type config_file: ``str``
         """
 
-        self.CONFIG_FILE = config_file
+        self.configuration = reader_utils._readConfig(self.CONFIG_FILE)
+        self.data_partition = self.configuration['DIRECTORY PATHS']['data partition']
+        self.roi = self.configuration['ROI']
+        self.dates = self.configuration['dates']
 
-
-    def example_method(self):
-        """A simple example to show use of the ``self`` keyword by creating
-        the results directory if it does not exist.
-
-        :return: True if results directory was created else False
-        :rtype: ``boolean``
-        """
-
-        results_dir_path = self.configuration['DIRECTORY PATHS']['results']
-        self.results_dir = results_dir_path
-
-        if not os.path.isdir(results_dir_path):
-            os.mkdir(results_dir_path)
-            return True
-        else:
-            return False
-
+        self.EPSG = self.configuration['EPSG']
+        self.BAND_DICT = self.configuration['BAND_DICT']
+        self.MAX_CLOUD_PROBABILITY = self.configuration['MAX_CLOUD_PROBABILITY']
+        self.NIR_LAND_THRESH = self.configuration['NIR_LAND_THRESH']
+        self.MASK_LAND = self.configuration['MASK_LAND']
 
     def run(self):
         """The run method to control all workflow.
         """
 
-        self.configuration = reader_utils._readConfig(self.CONFIG_FILE)
+        sites_dir_path = os.path.join(self.data_partition, 'sites')
+        if os.path.exists(sites_dir_path):
+            sites = os.listdir(sites_dir_path)
+        else:
+            printError(f'no sites found in {sites_dir_path}')
 
-        # the example_method shows how self can use used
-        # by creating the results directory if it doesn't exist
-        if self.example_method():
-            print(f'created directory: {self.results_dir}')
+        for site in sites:
+
+            kml_filepath = os.path.join(sites_dir_path, site)
+            kml_polygon = tools.polygon_from_kml(kml_filepath)
+            roi_polygon = tools.smallest_rectangle(kml_polygon)
+
+            site_name = site[:site.find('.')]
+            median_dir_path = os.path.join(self.data_partition, site_name, 'median')
+
+            for date_pair in self.dates:
+                printProgress(f'processing {site_name}: {date_pair}')
+                printProgress('')
+
+                downloader.getMedianS2GEEImage(site_name, self.roi, self.dates,
+                                               median_dir_path, self.EPSG, \
+                                                self.BAND_DICT, self.MASK_LAND)
+
+            downloader.save_metadata(site_name, median_dir_path)
+
+            preprocess.createSeaMask(median_dir_path, site_name)
+
+
+
 
 
 if __name__ == '__main__':
