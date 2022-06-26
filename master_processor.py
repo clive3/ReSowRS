@@ -4,7 +4,7 @@ import sys
 
 from resow.utils import reader_utils
 
-class RESOW(object):
+class RESOWRS(object):
     """RESOW class - includes a ``run()`` method to control workflow.
     """
 
@@ -56,5 +56,5 @@ if __name__ == '__main__':
         warnings.simplefilter('ignore')
 
     # make an instance of the class and implement the run method
-    obj = RESOW('resow_config.ini')
+    obj = RESOWRS('resow_config.ini')
     obj.run()
