@@ -1,18 +1,10 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Jul 16 09:35:46 2019coast.coast_params
-
-@author: cneil
-"""
 import os
 
 
-def geotifFileName(site_name, date_start, date_end, band_key):
+def geotifFileName(site_name, date_start, date_end, scale):
 
-    if band_key  is None:
-        file_name = site_name + '_median_' + date_start.replace('-','') +'_'+ date_end.replace('-','') + '.tif'
-    else:
-        file_name = site_name + '_test_' + date_start.replace('-','') +'_'+ date_end.replace('-','') + '_' + band_key + '.tif'
+    file_name = site_name + '_median_' + date_start.replace('-','') \
+                +'_'+ date_end.replace('-','') + '_' + str(scale) + 'm.tif'
 
     return file_name
 

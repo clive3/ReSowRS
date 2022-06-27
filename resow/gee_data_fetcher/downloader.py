@@ -5,84 +5,52 @@ import zipfile
 
 from urllib.request import urlretrieve
 
-from resow.utils.print_utils import printProgress, printSuccess, printError
+from resow.utils.print_utils import printProgress, printSuccess
 from resow.utils.name_utils import geotifFileName, pickleDumpName, hansenFilePath
 
 
-def getMedianS2GEEImage(site_name, roi, dates, median_dir_path, EPSG,
-                        BAND_DICT, MASK_LAND, NIR_LAND_THRESH,
-                        MAX_CLOUD_PROBABILITY):
-
-    date_start, date_end = dates[0], dates[1]
-
-    if not os.path.exists(median_dir_path):
-        os.makedirs(median_dir_path)
-    directory_path_list = makeDirectories(median_dir_path, BAND_DICT)
+def downloadMedianS2GEEImage(site_name, roi_polygon, date_pair,
+                             images_dir_path, EPSG,
+                             BANDS, SCALE, MASK_LAND, NIR_LAND_THRESH,
+                             MAX_CLOUD_PROBABILITY):
 
     ee.Initialize()
     printProgress('connected to GEE')
 
-    region = ee.Geometry.Polygon(roi)
-#    region = ee.Geometry.Point(roi).buffer(2000)
+    region = ee.Geometry.Polygon(roi_polygon)
+    date_start, date_end = date_pair[0], date_pair[1]
 
-    image_median, median_number = getMedianImage(region, dates, MASK_LAND, NIR_LAND_THRESH, MAX_CLOUD_PROBABILITY)
+    image_median, median_number = getMedianGEEImage(region, date_pair,
+                                                    MASK_LAND, NIR_LAND_THRESH,
+                                                    MAX_CLOUD_PROBABILITY)
 
-    local_data = os.path.join(median_dir_path, 'data.tif')
+    image_filename = geotifFileName(site_name, date_start, date_end, SCALE)
 
-    image_filenames = {}
-    for band_key in BAND_DICT.keys():
-        image_filenames[band_key] = geotifFileName(site_name, date_start, date_end, band_key)
+    local_data = os.path.join(images_dir_path, 'data.tif')
+    local_file_path = os.path.join(images_dir_path, image_filename)
 
-    for index, band_key in enumerate(BAND_DICT.keys()):
+    printProgress(f'\t downloading median S2 image...')
+    downloadGEEImage(image=image_median,
+                     scale=ee.Number(SCALE),
+                     region=region,
+                     directory_path=images_dir_path,
+                     bands=BANDS)
 
-        band_names = BAND_DICT[band_key][0]
-        band_scale = BAND_DICT[band_key][1]
-        band_directory_path = directory_path_list[index + 1]
-        image_file_name = image_filenames[band_key]
+    try:
+        os.rename(local_data, local_file_path)
+    except:  # overwrite if already exists
+        os.remove(local_file_path)
+        os.rename(local_data, local_file_path)
 
-        local_data = band_directory_path + '\\data.tif'
-        local_file_path = os.path.join(band_directory_path, image_file_name)
-
-        printProgress(f'\t"{band_key}" bands:\t{band_names}')
-        download_GEE_image(image=image_median,
-                           scale=ee.Number(band_scale),
-                           region=region,
-                           directory_path=band_directory_path,
-                           bands=band_names)
-
-        try:
-            os.rename(local_data, local_file_path)
-        except:  # overwrite if already exists
-            os.remove(local_file_path)
-            os.rename(local_data, local_file_path)
-
-    if not MASK_LAND:
-        base_file_name = image_file_name.replace('_'+band_key+'.tif', '')
-    else:
-        base_file_name = image_file_name.replace('_'+band_key+'.tif', '')
-
-    txt_file_name = base_file_name + '.txt'
-
-    metadata_dict = {'file_name': base_file_name,
-                     'epsg': EPSG,
-                     'date_start': date_start,
-                     'date_end': date_end,
-                     'number_images': median_number}
-
-    with open(os.path.join(directory_path_list[0], txt_file_name), 'w') as f:
-        for key in metadata_dict.keys():
-            f.write('%s\t%s\n' % (key, metadata_dict[key]))
-
-    printProgress('GEE connection closed')
     printSuccess('median image downloaded')
 
-    local_data = os.path.join(median_dir_path, 'data.tif')
-    hansen_file_path = hansenFilePath(median_dir_path, site_name)
-    download_GEE_image(image=ee.Image('UMD/hansen/global_forest_change_2015'),
-                       scale=ee.Number(10),
-                       region=region,
-                       directory_path=median_dir_path,
-                       bands='datamask')
+    local_data = os.path.join(images_dir_path, 'data.tif')
+    hansen_file_path = hansenFilePath(images_dir_path, site_name)
+    downloadGEEImage(image=ee.Image('UMD/hansen/global_forest_change_2015'),
+                     scale=ee.Number(SCALE),
+                     region=region,
+                     directory_path=images_dir_path,
+                     bands='datamask')
 
     try:
         os.rename(local_data, hansen_file_path)
@@ -91,8 +59,10 @@ def getMedianS2GEEImage(site_name, roi, dates, median_dir_path, EPSG,
         os.rename(local_data, hansen_file_path)
     printSuccess('hansen2015 downloaded')
 
+    printProgress('GEE connection closed')
 
-def download_GEE_image(image, scale, region, directory_path, bands):
+
+def downloadGEEImage(image, scale, region, directory_path, bands):
 
     path = image.getDownloadURL({
         'name': 'data',
@@ -107,23 +77,7 @@ def download_GEE_image(image, scale, region, directory_path, bands):
         return local_zipfile.extractall(path=str(directory_path))
 
 
-def makeDirectories(base_directory, BAND_DICT):
-
-    directory_names = ['meta']
-
-    for key in BAND_DICT.keys():
-        directory_names.append(key)
-
-    directory_paths = []
-    for directory_name in directory_names:
-        directory_path = os.path.join(base_directory, directory_name)
-        directory_paths.append(directory_path)
-        if not os.path.exists(directory_path):  os.makedirs(directory_path)
-
-    return directory_paths
-
-
-def getMedianImage(region, dates, MASK_LAND, NIR_LAND_THRESH, MAX_CLOUD_PROBABILITY):
+def getMedianGEEImage(region, dates, MASK_LAND, NIR_LAND_THRESH, MAX_CLOUD_PROBABILITY):
 
     def maskClouds(img):
 
@@ -208,7 +162,7 @@ def save_metadata(site_name, median_dir_path):
     printProgress('metadata saved')
 
 
-def load_metadata(site_name, median_dir_path, dates):
+def load_metadata(site_name, median_dir_path, dates, BAND_DICT):
 
     sat_name='S2'
     date_start = dates[0]
