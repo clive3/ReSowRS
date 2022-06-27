@@ -24,8 +24,6 @@ class RESOWRS(object):
 
         self.configuration = reader_utils.readConfig(config_file)
         self.data_partition = self.configuration['DIRECTORY PATHS']['data partition']
-        self.ROI = self.configuration['GEE SETTINGS']['ROI']
-        self.EPSG = self.configuration['GEE SETTINGS']['EPSG']
         self.DATES = ast.literal_eval(self.configuration['GEE SETTINGS']['DATES'])
         self.BANDS = ast.literal_eval(self.configuration['GEE SETTINGS']['BANDS'])
         self.SCALE = ast.literal_eval(self.configuration['GEE SETTINGS']['SCALE'])
@@ -43,6 +41,7 @@ class RESOWRS(object):
             sites = os.listdir(sites_dir_path)
         else:
             printError(f'no sites found in {sites_dir_path}')
+
 
         for site in sites:
 

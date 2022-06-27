@@ -61,7 +61,7 @@ def downloadMedianS2GEEImage(site_name, roi_polygon, date_pair, images_dir_path,
 
     printProgress('GEE connection closed')
 
-    return  median_number, image_epsg
+    return median_number, image_epsg
 
 
 def downloadGEEImage(image, scale, region, directory_path, bands):
