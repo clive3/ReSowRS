@@ -3,12 +3,12 @@ import os
 import sys
 import ast
 
-from resow.utils import reader_utils
+from resow.utils import reader_utils, geometry_utils
 from resow.utils.print_utils import printError, printProgress
 from resow.utils.file_system_utils import saveMetadata
 from resow.utils.name_utils import geotiffFileName
 
-from resow.gee_data_fetcher import downloader
+from resow.gee_data_fetcher import downloader, tools
 
 
 class RESOWRS(object):
@@ -22,7 +22,7 @@ class RESOWRS(object):
         :type config_file: ``str``
         """
 
-        self.configuration = reader_utils._readConfig(config_file)
+        self.configuration = reader_utils.readConfig(config_file)
         self.data_partition = self.configuration['DIRECTORY PATHS']['data partition']
         self.ROI = self.configuration['GEE SETTINGS']['ROI']
         self.EPSG = self.configuration['GEE SETTINGS']['EPSG']
@@ -73,7 +73,7 @@ class RESOWRS(object):
 
                 printProgress('metadata saved')
 
-            preprocess.createSeaMask(images_dir_path, site_name, self.SMALL_OBJECT_SIZE)
+            geometry_utils.createSeaMask(images_dir_path, site_name, self.SMALL_OBJECT_SIZE)
 
             printProgress('sea mask created')
 
