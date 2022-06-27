@@ -53,16 +53,6 @@ def printProgress(message):
 
     ## if 'progress' global parameter is set print the message
     if progress == 1: print(f'progress  >>>  {message}')
-        
-        
-def printSuccess(message):
-
-    ## if 'progress' global parameter is set print the message
-    # if ( global_params.success == 1 ): print (f'success   \u2713  {message}')
-    if success == 1:
-        print('*******')
-        print(f'success   ~~~  {message}')
-        print('*******')
 
 
 def printWarning(message):

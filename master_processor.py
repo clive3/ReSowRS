@@ -5,9 +5,10 @@ import ast
 
 from resow.utils import reader_utils
 from resow.utils.print_utils import printError, printProgress
-from resow.utils.file_system_utils import makeDirectories
+from resow.utils.file_system_utils import saveMetadata
+from resow.utils.name_utils import geotiffFileName
 
-from resow.gee_data_fetcher import downloader, preprocess,  tools
+from resow.gee_data_fetcher import downloader
 
 
 class RESOWRS(object):
@@ -60,15 +61,22 @@ class RESOWRS(object):
                 printProgress(f'processing {site_name}: {date_pair}')
                 printProgress('')
 
-                downloader.downloadMedianS2GEEImage(site_name, roi_polygon,
-                                                    date_pair, images_dir_path,
-                                                    self.EPSG, self.BANDS, self.SCALE,
-                                                    self.MASK_LAND, self.NIR_LAND_THRESH,
-                                                    self.MAX_CLOUD_PROBABILITY)
+                median_number, image_epsg = downloader.downloadMedianS2GEEImage(
+                                    site_name, roi_polygon, date_pair, images_dir_path,
+                                    self.BANDS, self.SCALE, self.MASK_LAND,
+                                    self.NIR_LAND_THRESH, self.MAX_CLOUD_PROBABILITY)
 
-#            downloader.save_metadata(site_name, median_dir_path)
+                metadata_filename = geotiffFileName(site_name, date_pair[0], date_pair[1], self.SCALE)
+                metadata_filename = metadata_filename.replace('tif', 'txt')
+                metadata_filepath = os.path.join(images_dir_path, metadata_filename)
+                saveMetadata(metadata_filepath, date_pair, image_epsg, median_number)
+
+                printProgress('metadata saved')
 
             preprocess.createSeaMask(images_dir_path, site_name, self.SMALL_OBJECT_SIZE)
+
+            printProgress('sea mask created')
+
 
 
 if __name__ == '__main__':
