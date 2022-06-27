@@ -3,6 +3,7 @@ channels:
   - defaults
   - conda-forge
 dependencies:
+  - gdal=2.3.3
   - geopandas=0.6.1
   - geojson=2.5.0
   - jupyter=1.0.0
