@@ -2,8 +2,6 @@ import os
 import numpy as np
 from osgeo import gdal
 
-import skimage.transform as transform
-import sklearn.decomposition as decomposition
 from skimage.morphology import remove_small_objects, remove_small_holes, \
     disk, erosion
 
