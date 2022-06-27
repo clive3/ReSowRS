@@ -2,7 +2,7 @@
 import configparser
 
 
-def _readConfig(config_file_path):
+def readConfig(config_file_path):
     """Reads the configuration ini file.
 
     :param config_file_path: path to the configuration file
