@@ -18,34 +18,34 @@ def downloadMedianS2GEEImage(site_name, roi_polygon, date_pair, images_dir_path,
     region = ee.Geometry.Polygon(roi_polygon)
     date_start, date_end = date_pair[0], date_pair[1]
 
-    image_median, median_number = getMedianGEEImage(region, date_pair,
-                                                    MASK_LAND, NIR_LAND_THRESH,
-                                                    MAX_CLOUD_PROBABILITY)
+    ee_image_median, number_images = getMedianGEEImage(region, date_pair,
+                                                       MASK_LAND, NIR_LAND_THRESH,
+                                                       MAX_CLOUD_PROBABILITY)
 
-    image_metadata = image_median.getInfo()
+    image_metadata = ee_image_median.getInfo()
     image_epsg = image_metadata['bands'][0]['crs'][5:]
 
     image_filename = geotiffFileName(site_name, date_start, date_end, SCALE)
 
-    local_data = os.path.join(images_dir_path, 'data.tif')
-    local_file_path = os.path.join(images_dir_path, image_filename)
+    download_filepath = os.path.join(images_dir_path, 'data.tif')
+    image_filepath = os.path.join(images_dir_path, image_filename)
 
-    downloadGEEImage(image=image_median,
+    downloadGEEImage(image=ee_image_median,
                      scale=ee.Number(SCALE),
                      region=region,
                      directory_path=images_dir_path,
                      bands=BANDS)
 
     try:
-        os.rename(local_data, local_file_path)
+        os.rename(download_filepath, image_filepath)
     except:
-        os.remove(local_file_path)
-        os.rename(local_data, local_file_path)
+        os.remove(image_filepath)
+        os.rename(download_filepath, image_filepath)
 
-    printProgress(f'median S2 downloaded from {median_number} images')
+    printProgress(f'median S2 composite from {number_images} images downloaded')
 
-    local_data = os.path.join(images_dir_path, 'data.tif')
-    hansen_file_path = hansenFilePath(images_dir_path, site_name)
+    download_filepath = os.path.join(images_dir_path, 'gee_image.tif')
+    hansen_filepath = hansenFilePath(images_dir_path, site_name)
     downloadGEEImage(image=ee.Image('UMD/hansen/global_forest_change_2015'),
                      scale=ee.Number(SCALE),
                      region=region,
@@ -53,25 +53,25 @@ def downloadMedianS2GEEImage(site_name, roi_polygon, date_pair, images_dir_path,
                      bands='datamask')
 
     try:
-        os.rename(local_data, hansen_file_path)
+        os.rename(download_filepath, hansen_filepath)
     except:  # overwrite if already exists
-        os.remove(hansen_file_path)
-        os.rename(local_data, hansen_file_path)
+        os.remove(hansen_filepath)
+        os.rename(download_filepath, hansen_filepath)
     printProgress('hansen2015 downloaded')
 
     printProgress('GEE connection closed')
 
-    return median_number, image_epsg
+    return number_images, image_epsg
 
 
-def downloadGEEImage(image, scale, region, directory_path, bands):
+def downloadGEEImage(image, SCALE, region, directory_path, BANDS):
 
     path = image.getDownloadURL({
-        'name': 'data',
-        'scale': scale,
+        'name': 'gee_image',
+        'scale': SCALE,
         'region': region,
         'filePerBand': False,
-        'bands': bands
+        'bands': BANDS
     })
 
     local_zip, headers = urlretrieve(path)
@@ -81,42 +81,37 @@ def downloadGEEImage(image, scale, region, directory_path, bands):
 
 def getMedianGEEImage(region, dates, MASK_LAND, NIR_LAND_THRESH, MAX_CLOUD_PROBABILITY):
 
-    def maskClouds(img):
-
-        clouds = ee.Image(img.get('cloud_mask')).select('probability')
+    def maskClouds(ee_image_col):
+        clouds = ee.Image(ee_image_col.get('cloud_mask')).select('probability')
         isNotCloud = clouds.lt(MAX_CLOUD_PROBABILITY)
+        return ee_image_col.updateMask(isNotCloud)
 
-        return img.updateMask(isNotCloud)
-
-    def maskLand(img):
-
-        NIR = ee.Image(img.select('B8'))
+    def maskLand(ee_image_col):
+        NIR = ee.Image(ee_image_col.select('B8'))
         isNotLand = NIR.lt(NIR_LAND_THRESH*1000)
-
-        return img.updateMask(isNotLand)
-
+        return ee_image_col.updateMask(isNotLand)
 
     S2SR_col = ee.ImageCollection('COPERNICUS/S2_SR')\
                                     .filterBounds(region)\
                                     .filterDate(dates[0], dates[1])
 
-    S2_cloudprob_col = ee.ImageCollection('COPERNICUS/S2_CLOUD_PROBABILITY')\
+    S2_cloud_prob_col = ee.ImageCollection('COPERNICUS/S2_CLOUD_PROBABILITY')\
                                     .filterBounds(region)\
                                     .filterDate(dates[0], dates[1])
 
-    S2SRwithCloudMask = ee.ImageCollection(ee.Join.saveFirst('cloud_mask')\
+    S2SR_cloud_masked_col = ee.ImageCollection(ee.Join.saveFirst('cloud_mask')\
                                                   .apply(**{'primary': S2SR_col,
-                                                            'secondary': S2_cloudprob_col,
+                                                            'secondary': S2_cloud_prob_col,
                                                             'condition': ee.Filter.equals(**{
                                                             'leftField': 'system:index',
                                                             'rightField': 'system:index'})}))
 
-    image_list = S2SRwithCloudMask.toList(500)
+    image_list = S2SR_cloud_masked_col.toList(500)
     number_images = len(image_list.getInfo())
 
     if MASK_LAND:
-        image_median = S2SRwithCloudMask.map(maskClouds).map(maskLand).median()
+        image_median = S2SR_cloud_masked_col.map(maskClouds).map(maskLand).median()
     else:
-        image_median = S2SRwithCloudMask.map(maskClouds).median()
+        image_median = S2SR_cloud_masked_col.map(maskClouds).median()
 
     return image_median, number_images
