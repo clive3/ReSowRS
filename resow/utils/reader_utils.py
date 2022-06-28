@@ -11,7 +11,6 @@ def readConfig(config_file_path):
     :return: the configuration object read from the local configuration file
     :rtype: ``configparser``
 
-    :meta private:
     """
 
     configuration = configparser.ConfigParser()

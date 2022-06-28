@@ -1,12 +1,14 @@
 import os
+import math
 import numpy as np
 from osgeo import gdal
+from geopandas import read_file
+from pyproj import transform, Proj
 
 from skimage.morphology import remove_small_objects, remove_small_holes, \
     disk, erosion
 
 from resow.utils.print_utils import printWarning, printError
-
 from resow.utils.name_utils import hansenFilePath, seaMaksFilePath
 
 
@@ -88,3 +90,37 @@ def applySeaMask(median_dir_path):
 
     sea_mask_np, geometry = readGeotiff(os.path.join(seaMaksFilePath(median_dir_path)))
 
+
+def polygon_from_geojson(hexgrid_filepath, OUTPUT_EPSG):
+    """
+    Extracts coordinates from a geojson file in format required
+    by gee.
+
+    :param geojson_filepath: path to the geojson file
+    :type geojson_filepath: ``str``
+
+    :return: the configuration object read from the local configuration file
+    :rtype: ``configparser``
+
+    """
+
+    hexgrid_df = read_file(hexgrid_filepath)
+    west = int(hexgrid_df['west'].values[0])
+    east = int(hexgrid_df['east'].values[0])
+    north = int(hexgrid_df['north'].values[0])
+    south = int(hexgrid_df['south'].values[0])
+
+    projectionIn = Proj(init='epsg:' + OUTPUT_EPSG)
+
+    long_w, lat_n = projectionIn(west, north, inverse=True)
+    long_e, lat_s = projectionIn(east, south, inverse=True)
+
+    grid_size = int((west - east)*(south - north)/100)
+    print(f'grid area: {grid_size} pixels, {math.sqrt(grid_size)}')
+
+    polygon = f'POLYGON(({west} {north}, {west} {south} ,' + \
+           f'{east} {south}, {east} {north}, {west} {north}))'
+
+    printError(polygon)
+
+    return polygon

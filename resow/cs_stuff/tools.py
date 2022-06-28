@@ -45,6 +45,7 @@ def polygon_from_kml(fn):
 
     return [polygon]
 
+
 def smallest_rectangle(polygon):
     """
     Converts a polygon to the smallest rectangle polygon with sides parallel

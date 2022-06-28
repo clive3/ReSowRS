@@ -7,8 +7,9 @@ from resow.utils import reader_utils, geometry_utils
 from resow.utils.print_utils import printError, printProgress
 from resow.utils.file_system_utils import saveMetadata
 from resow.utils.name_utils import geotiffFileName
+from resow.utils.geometry_utils import polygon_from_geojson
 
-from resow.gee_data_fetcher import downloader, tools
+from resow.gee_data_fetcher import downloader
 
 
 class RESOWRS(object):
@@ -23,14 +24,16 @@ class RESOWRS(object):
         """
 
         self.configuration = reader_utils.readConfig(config_file)
-        self.data_partition = self.configuration['DIRECTORY PATHS']['data partition']
-        self.DATES = ast.literal_eval(self.configuration['GEE SETTINGS']['DATES'])
-        self.BANDS = ast.literal_eval(self.configuration['GEE SETTINGS']['BANDS'])
-        self.SCALE = ast.literal_eval(self.configuration['GEE SETTINGS']['SCALE'])
-        self.MAX_CLOUD_PROBABILITY = ast.literal_eval(self.configuration['GEE SETTINGS']['MAX_CLOUD_PROBABILITY'])
-        self.NIR_LAND_THRESH = ast.literal_eval(self.configuration['GEE SETTINGS']['NIR_LAND_THRESH'])
-        self.MASK_LAND = ast.literal_eval(self.configuration['GEE SETTINGS']['MASK_LAND'])
-        self.SMALL_OBJECT_SIZE = ast.literal_eval(self.configuration['GEE SETTINGS']['SMALL_OBJECT_SIZE'])
+
+        self.data_partition = self.configuration['PATHS']['data partition']
+        self.DATES = ast.literal_eval(self.configuration['GEE']['DATES'])
+        self.BANDS = ast.literal_eval(self.configuration['GEE']['BANDS'])
+        self.SCALE = ast.literal_eval(self.configuration['GEE']['SCALE'])
+        self.MAX_CLOUD_PROBABILITY = ast.literal_eval(self.configuration['GEE']['MAX_CLOUD_PROBABILITY'])
+        self.NIR_LAND_THRESH = ast.literal_eval(self.configuration['GEE']['NIR_LAND_THRESH'])
+        self.MASK_LAND = ast.literal_eval(self.configuration['GEE']['MASK_LAND'])
+        self.SMALL_OBJECT_SIZE = ast.literal_eval(self.configuration['GEE']['SMALL_OBJECT_SIZE'])
+        self.OUTPUT_EPSG = self.configuration['MAPPING']['OUTPUT_EPSG']
 
     def run(self):
         """The run method to control all workflow.
@@ -42,15 +45,14 @@ class RESOWRS(object):
         else:
             printError(f'no sites found in {sites_dir_path}')
 
-
         for site in sites:
 
-            kml_filepath = os.path.join(sites_dir_path, site)
-            kml_polygon = tools.polygon_from_kml(kml_filepath)
-            roi_polygon = tools.smallest_rectangle(kml_polygon)
+            site_filepah = os.path.join(sites_dir_path, site)
+
+            roi_polygon = polygon_from_geojson(site_filepah, self.OUTPUT_EPSG)
 
             site_name = site[:site.find('.')]
-            images_dir_path = os.path.join(self.data_partition, site_name, 'images')
+            images_dir_path = os.path.join(self.data_partition, 'images', site_name)
 
             if not os.path.exists(images_dir_path):
                 os.makedirs(images_dir_path)
@@ -75,7 +77,6 @@ class RESOWRS(object):
             geometry_utils.createSeaMask(images_dir_path, site_name, self.SMALL_OBJECT_SIZE)
 
             printProgress('sea mask created')
-
 
 
 if __name__ == '__main__':
