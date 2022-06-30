@@ -9,6 +9,8 @@ from resow.utils.file_system_utils import saveMetadata
 from resow.utils.name_utils import geotiffFileName
 from resow.utils.geometry_utils import polygon_from_geojson
 
+from resow.cs_stuff import tools
+
 from resow.gee_data_fetcher import downloader
 
 
@@ -49,7 +51,10 @@ class RESOWRS(object):
 
             site_filepah = os.path.join(sites_dir_path, site)
 
-            roi_polygon = polygon_from_geojson(site_filepah, self.OUTPUT_EPSG)
+            kml_filepath = os.path.join(sites_dir_path, site)
+            kml_polygon = tools.polygon_from_kml(kml_filepath)
+            roi_polygon = tools.smallest_rectangle(kml_polygon)
+#            roi_polygon = polygon_from_geojson(site_filepah, self.OUTPUT_EPSG)
 
             site_name = site[:site.find('.')]
             images_dir_path = os.path.join(self.data_partition, 'images', site_name)

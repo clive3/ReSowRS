@@ -4,7 +4,7 @@ import zipfile
 
 from urllib.request import urlretrieve
 
-from resow.utils.print_utils import printProgress
+from resow.utils.print_utils import printProgress, printError
 from resow.utils.name_utils import geotiffFileName, hansenFilePath
 
 
@@ -24,6 +24,8 @@ def downloadMedianS2GEEImage(site_name, roi_polygon, date_pair, images_dir_path,
 
     image_metadata = ee_image_median.getInfo()
     image_epsg = image_metadata['bands'][0]['crs'][5:]
+
+    printError(ee_image_median)
 
     image_filename = geotiffFileName(site_name, date_start, date_end, SCALE)
 
