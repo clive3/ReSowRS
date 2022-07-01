@@ -16,7 +16,7 @@ resow.utils.file_system_utils module
 
 resow.utils.geometry_utils module
 ---------------------------------
-**This module contains functions for all processing requirting geometry.**
+**This module contains functions for all processing requiring geometry.**
 
 .. automodule:: resow.utils.geometry_utils
    :members:
