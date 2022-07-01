@@ -1,6 +1,6 @@
 seastar.utils package
 =====================
-**This package contains utility functions such as IO and tools.**
+**This package contains all the utility functions.**
    
 
 submodules
@@ -8,7 +8,7 @@ submodules
 
 resow.utils.file_system_utils module
 ------------------------------------
-**This module contains helper functions for wind and currents.**
+**This module contains functions for all file system interaction.**
 
 .. automodule:: resow.utils.file_system_utils
    :members:
@@ -16,7 +16,7 @@ resow.utils.file_system_utils module
 
 resow.utils.geometry_utils module
 ---------------------------------
-**This module contains helper functions for wind and currents.**
+**This module contains functions for all processing requirting geometry.**
 
 .. automodule:: resow.utils.geometry_utils
    :members:
@@ -24,7 +24,7 @@ resow.utils.geometry_utils module
 
 resow.utils.reader_utils module
 -------------------------------
-**This module contains functions to interact with the file system.**
+**This module contains functions to read files from the local file system.**
 
 .. automodule:: resow.utils.reader_utils
    :members:

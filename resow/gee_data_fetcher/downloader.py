@@ -11,6 +11,9 @@ from resow.utils.name_utils import _geotiffFileName, _hansenFilePath
 def downloadMedianS2GEEImage(site_name, roi_polygon, date_pair, images_dir_path,
                              EPSG, BANDS, SCALE, MASK_LAND, NIR_LAND_THRESH,
                              MAX_CLOUD_PROBABILITY):
+    """Connects to GEE and downloads a median composite image based on the
+    parameters.
+    """
 
     ee.Initialize()
     _printProgress('connected to GEE')
