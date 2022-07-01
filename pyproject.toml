@@ -3,7 +3,7 @@ name = 'resow'
 description = 'resow project'
 version = '1.0'
 readme = 'README.md'
-dependencies = ['numpy', 'ee']
+dependencies = ['ee', ''numpy', 'osgeo', 'StringIO']
 
 [build-system]
 build-backend = 'flit_core.buildapi'
