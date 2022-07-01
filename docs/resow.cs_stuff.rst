@@ -12,6 +12,5 @@ resow.cs_stuff.tools module
 
 .. automodule:: resow.cs_stuff.tools
    :members:
-   :private-members:
 
 * :ref:`genindex`
