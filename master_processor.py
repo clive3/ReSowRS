@@ -2,6 +2,7 @@
 import os
 import sys
 import ast
+import glob
 
 from resow.utils import reader_utils, geometry_utils
 from resow.utils.print_utils import _printError, _printProgress
@@ -30,29 +31,37 @@ class RESOWRS(object):
         self.data_partition = self.configuration['PATHS']['data partition']
         self.DATES = ast.literal_eval(self.configuration['GEE']['DATES'])
         self.BANDS = ast.literal_eval(self.configuration['GEE']['BANDS'])
-        self.SCALE = ast.literal_eval(self.configuration['GEE']['SCALE'])
-        self.MAX_CLOUD_PROBABILITY = ast.literal_eval(self.configuration['GEE']['MAX_CLOUD_PROBABILITY'])
-        self.NIR_LAND_THRESH = ast.literal_eval(self.configuration['GEE']['NIR_LAND_THRESH'])
-        self.MASK_LAND = ast.literal_eval(self.configuration['GEE']['MASK_LAND'])
-        self.SMALL_OBJECT_SIZE = ast.literal_eval(self.configuration['GEE']['SMALL_OBJECT_SIZE'])
+        self.SCALE = int(self.configuration['GEE']['SCALE'])
+        self.MAX_CLOUD_PROBABILITY = self.configuration['GEE']['MAX_CLOUD_PROBABILITY']
+        self.NIR_LAND_THRESH = self.configuration['GEE']['NIR_LAND_THRESH']
+        self.MASK_LAND = self.configuration['GEE']['MASK_LAND']
+        self.SMALL_OBJECT_SIZE = self.configuration['GEE']['SMALL_OBJECT_SIZE']
         self.OUTPUT_EPSG = self.configuration['MAPPING']['OUTPUT_EPSG']
 
     def run(self):
         """The run method to control all workflow.
         """
 
+        extension = 'kml'
+
         sites_dir_path = os.path.join(self.data_partition, 'sites')
         if os.path.exists(sites_dir_path):
-            sites = os.listdir(sites_dir_path)
+            sites = glob.glob(pathname=sites_dir_path + f'/*.{extension}',
+                                         recursive=False)
         else:
             _printError(f'no sites found in {sites_dir_path}')
 
         for site in sites:
 
             site_filepath = os.path.join(sites_dir_path, site)
-            kml_polygon = tools.polygon_from_kml(site_filepath)
-            roi_polygon = tools.smallest_rectangle(kml_polygon)
-#            roi_polygon = polygon_from_geojson(site_filepath, self.OUTPUT_EPSG)
+
+            if extension == 'kml':
+                kml_polygon = tools.polygon_from_kml(site_filepath)
+                roi_polygon = tools.smallest_rectangle(kml_polygon)
+            elif extension == 'geojson':
+                roi_polygon = polygon_from_geojson(site_filepath, self.OUTPUT_EPSG)
+            else:
+                _printError(f'geometry type not recognised: {extension}')
 
             site_name = site[:site.find('.')]
             images_dir_path = os.path.join(self.data_partition, 'images', site_name)
