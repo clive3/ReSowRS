@@ -3,12 +3,12 @@ version: 2
 sphinx:
   fail_on_warning: false
 
-#python:
-#  version: 3.8
+python:
+  version: 3.8
   # Install our python package before building the docs
-#  install:
-#    - method: pip
-#      path: .
+  install:
+    - method: pip
+      path: .
 
-conda:
-  environment: env/environment.yml
+#conda:
+#  environment: env/environment.yml
