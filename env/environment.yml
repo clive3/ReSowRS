@@ -1,4 +1,4 @@
-name: resowrs
+name: resow
 channels:
   - defaults
   - conda-forge
