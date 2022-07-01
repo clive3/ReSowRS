@@ -70,4 +70,5 @@ def smallest_rectangle(polygon):
     polygon_geom = multipoints.envelope
     coords_polygon = np.array(polygon_geom.exterior.coords)
     polygon_rect = [[[_[0], _[1]] for _ in coords_polygon]]
+
     return polygon_rect
