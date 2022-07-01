@@ -2,7 +2,7 @@
 name = 'resow'
 description = 'resow package'
 version = '1.0'
-dependencies = ['numpy']
+dependencies = ['numpy', 'ee']
 
 [build-system]
 build-backend = 'flit_core.buildapi'
