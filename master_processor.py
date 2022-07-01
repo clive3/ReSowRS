@@ -49,12 +49,10 @@ class RESOWRS(object):
 
         for site in sites:
 
-            site_filepah = os.path.join(sites_dir_path, site)
-
-            kml_filepath = os.path.join(sites_dir_path, site)
-            kml_polygon = tools.polygon_from_kml(kml_filepath)
+            site_filepath = os.path.join(sites_dir_path, site)
+            kml_polygon = tools.polygon_from_kml(site_filepath)
             roi_polygon = tools.smallest_rectangle(kml_polygon)
-#            roi_polygon = polygon_from_geojson(site_filepah, self.OUTPUT_EPSG)
+#            roi_polygon = polygon_from_geojson(site_filepath, self.OUTPUT_EPSG)
 
             site_name = site[:site.find('.')]
             images_dir_path = os.path.join(self.data_partition, 'images', site_name)
@@ -69,10 +67,11 @@ class RESOWRS(object):
 
                 median_number, image_epsg = downloader.downloadMedianS2GEEImage(
                                     site_name, roi_polygon, date_pair, images_dir_path,
-                                    self.BANDS, self.SCALE, self.MASK_LAND,
+                                    self.OUTPUT_EPSG, self.BANDS, self.SCALE, self.MASK_LAND,
                                     self.NIR_LAND_THRESH, self.MAX_CLOUD_PROBABILITY)
 
-                metadata_filename = geotiffFileName(site_name, date_pair[0], date_pair[1], self.SCALE)
+                metadata_filename = geotiffFileName(site_name, date_pair[0], date_pair[1],
+                                                    self.SCALE, self.MASK_LAND)
                 metadata_filename = metadata_filename.replace('tif', 'txt')
                 metadata_filepath = os.path.join(images_dir_path, metadata_filename)
                 saveMetadata(metadata_filepath, date_pair, image_epsg, median_number)
