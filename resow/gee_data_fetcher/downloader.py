@@ -4,7 +4,7 @@ import zipfile
 
 from urllib.request import urlretrieve
 
-from resow.utils.print_utils import printProgress, printError
+from resow.utils.print_utils import printProgress
 from resow.utils.name_utils import geotiffFileName, hansenFilePath
 
 
@@ -48,7 +48,8 @@ def downloadMedianS2GEEImage(site_name, roi_polygon, date_pair, images_dir_path,
     printProgress(f'median S2 composite from {number_images} images downloaded')
 
     hansen_filepath = hansenFilePath(images_dir_path, site_name)
-    downloadGEEImage(image=ee.Image('UMD/hansen/global_forest_change_2015').reproject(crs=f'EPSG:{EPSG}', scale=ee_scale),
+    downloadGEEImage(image=ee.Image('UMD/hansen/global_forest_change_2015')\
+                           .reproject(crs=f'EPSG:{EPSG}', scale=ee_scale),
                      name=DOWNLOAD_FILENAME,
                      ee_scale=ee_scale,
                      ee_region=ee_region,
@@ -82,7 +83,8 @@ def downloadGEEImage(image, name, ee_scale, ee_region, directory_path, bands):
         return local_zipfile.extractall(path=str(directory_path))
 
 
-def getMedianGEEImage(ee_region, dates, EPSG, ee_scale, MASK_LAND, NIR_LAND_THRESH, MAX_CLOUD_PROBABILITY):
+def getMedianGEEImage(ee_region, dates, EPSG, ee_scale, MASK_LAND,
+                      NIR_LAND_THRESH, MAX_CLOUD_PROBABILITY):
 
     def maskClouds(ee_image_col):
         clouds = ee.Image(ee_image_col.get('cloud_mask')).select('probability')
@@ -111,7 +113,7 @@ def getMedianGEEImage(ee_region, dates, EPSG, ee_scale, MASK_LAND, NIR_LAND_THRE
             'leftField': 'system:index',
             'rightField': 'system:index'})})).map(maskClouds)
 
-    image_list = S2SR_cloud_masked_col.toList(500)
+    image_list = S2SR_cloud_masked_col.toList(200)
     number_images = len(image_list.getInfo())
 
     if MASK_LAND:
