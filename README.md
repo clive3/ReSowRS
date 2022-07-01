@@ -1,5 +1,3 @@
-##### ReSowRS
-
 <p align="left">
   <img src="/docs/images/logo.jpg" width="500">
 </p>
