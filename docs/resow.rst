@@ -13,6 +13,7 @@ subpackages
 
    resow.gee_data_fetcher
    resow.utils
+   resow.cs_stuff
 
 
 * :ref:`genindex`
