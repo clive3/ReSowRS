@@ -1,7 +1,8 @@
 [project]
 name = 'resow'
-description = 'resow package'
+description = 'resow project'
 version = '1.0'
+readme = 'README.md'
 dependencies = ['numpy', 'ee']
 
 [build-system]
