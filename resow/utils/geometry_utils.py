@@ -1,7 +1,7 @@
 import os
 import math
 import numpy as np
-import gdal
+from osgeo import gdal
 from geopandas import read_file
 from pyproj import transform, Proj
 
