@@ -4,7 +4,7 @@ import zipfile
 
 from urllib.request import urlretrieve
 
-from resow.utils.print_utils import _printProgress
+from resow.utils.print_utils import _printProgress, _printError
 from resow.utils.name_utils import _geotiffFileName, _hansenFilePath
 
 
@@ -116,7 +116,9 @@ def getMedianGEEImage(ee_region, dates, EPSG, ee_scale, MASK_LAND,
             'leftField': 'system:index',
             'rightField': 'system:index'})})).map(maskClouds)
 
-    image_list = S2SR_cloud_masked_col.toList(200)
+    image_list = S2SR_cloud_masked_col.toList(500)
+
+    print(image_list)
     number_images = len(image_list.getInfo())
 
     if MASK_LAND:
