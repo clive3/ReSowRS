@@ -32,7 +32,7 @@ If your terminal command line prompt now starts with `(resow)` you have succeede
 
 ### 2.1 Set parameters for your local environment
 
-From the directory containing the **ReSowRS** edit the file **resow_config.ini** and set the parameters as required e.g. set the path to the  local directories for the data and EPSG code for the images downloaded from GEE.
+From the directory containing the **ReSowRS** edit the file **resow_config.ini** and set the parameters as required e.g. set the path to the  local directories for the data and EPSG code for the images downloaded from GEE etc.
 
 ### 2.2 Execute the processor
 
