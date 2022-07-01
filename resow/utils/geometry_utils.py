@@ -1,10 +1,11 @@
 import os
+import ast
 import math
 import numpy as np
 from osgeo import gdal
 from geopandas import read_file
-from pyproj import transform, Proj
-
+from pyproj import Proj
+from shapely import geometry
 from skimage.morphology import remove_small_objects, remove_small_holes, \
     disk, erosion
 
@@ -13,14 +14,6 @@ from resow.utils.name_utils import _hansenFilePath, _seaMaskFilePath
 
 
 def readGeotiff(image_file_path):
-    """Reads a geotiff and returns a numpy array and geometry information.
-
-    Args:
-        image_file_path:
-
-    Returns:
-
-    """
 
     ## import the input file and its geometry
     image_dataset_gdal = gdal.Open(image_file_path, gdal.GA_ReadOnly)
@@ -107,10 +100,12 @@ def polygon_from_geojson(hexgrid_filepath, OUTPUT_EPSG):
     :param geojson_filepath: path to the geojson file
     :type geojson_filepath: ``str``
 
-    :return: the configuration object read from the local configuration file
-    :rtype: ``configparser``
+    :return: WKT Polygon
+    :rtype: ``str``
 
     """
+
+    proj_image = Proj(init=f'epsg:{OUTPUT_EPSG}')
 
     hexgrid_df = read_file(hexgrid_filepath)
     west = int(hexgrid_df['west'].values[0])
@@ -118,17 +113,16 @@ def polygon_from_geojson(hexgrid_filepath, OUTPUT_EPSG):
     north = int(hexgrid_df['north'].values[0])
     south = int(hexgrid_df['south'].values[0])
 
-    projectionIn = Proj(init='epsg:' + OUTPUT_EPSG)
-
-    long_w, lat_n = projectionIn(west, north, inverse=True)
-    long_e, lat_s = projectionIn(east, south, inverse=True)
+    west_4326, north_4326 = proj_image(west, north, inverse=True)
+    east_4326, south_4326 = proj_image(east, south, inverse=True)
 
     grid_size = int((west - east)*(south - north)/100)
     print(f'grid area: {grid_size} pixels, {math.sqrt(grid_size)}')
 
-    polygon = f'POLYGON(({west} {north}, {west} {south} ,' + \
-           f'{east} {south}, {east} {north}, {west} {north}))'
+    polygon = f'[[[{west_4326:.3f}, {south_4326:.3f}], ' + \
+                f'[{east_4326:.3f}, {south_4326:.3f}], ' + \
+                f'[{east_4326:.3f}, {north_4326:.3f}], ' + \
+                f'[{west_4326:.3f}, {north_4326:.3f}], ' + \
+                f'[{west_4326:.3f}, {south_4326:.3f}]]]'
 
-    _printError(polygon)
-
-    return polygon
+    return ast.literal_eval(polygon)
