@@ -118,7 +118,6 @@ def getMedianGEEImage(ee_region, dates, EPSG, ee_scale, MASK_LAND,
 
     image_list = S2SR_cloud_masked_col.toList(500)
 
-    print(image_list)
     number_images = len(image_list.getInfo())
 
     if MASK_LAND:

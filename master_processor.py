@@ -46,14 +46,12 @@ class RESOWRS(object):
 
         sites_dir_path = os.path.join(self.data_partition, 'sites')
         if os.path.exists(sites_dir_path):
-            sites = glob.glob(pathname=sites_dir_path + f'/*.{extension}',
+            site_file_paths = glob.glob(pathname=sites_dir_path + f'/*.{extension}',
                                          recursive=False)
         else:
             _printError(f'no sites found in {sites_dir_path}')
 
-        for site in sites:
-
-            site_filepath = os.path.join(sites_dir_path, site)
+        for site_filepath in site_file_paths:
 
             if extension == 'kml':
                 kml_polygon = tools.polygon_from_kml(site_filepath)
@@ -63,7 +61,8 @@ class RESOWRS(object):
             else:
                 _printError(f'geometry type not recognised: {extension}')
 
-            site_name = site[:site.find('.')]
+            _, site_name = os.path.split(site_filepath)
+            site_name = site_name[:site_name.find('.')]
             images_dir_path = os.path.join(self.data_partition, 'images', site_name)
 
             if not os.path.exists(images_dir_path):
