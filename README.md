@@ -41,3 +41,7 @@ In the terminal window opened in the **ReSowRS** directory enter the following c
 ```
 >>> python master_processor.py
 ```
+
+## 3. Documentation
+
+[readthedocs](https://resowrs.readthedocs.io/en/latest/)
