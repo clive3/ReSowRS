@@ -6,6 +6,22 @@ seastar.utils package
 submodules
 ----------
 
+resow.utils.file_system_utils module
+------------------------------------
+**This module contains helper functions for wind and currents.**
+
+.. automodule:: resow.utils.file_system_utils
+   :members:
+   :private-members:
+
+resow.utils.geometry_utils module
+---------------------------------
+**This module contains helper functions for wind and currents.**
+
+.. automodule:: resow.utils.geometry_utils
+   :members:
+   :private-members:
+
 resow.utils.reader_utils module
 -------------------------------
 **This module contains functions to interact with the file system.**
@@ -13,22 +29,5 @@ resow.utils.reader_utils module
 .. automodule:: resow.utils.reader_utils
    :members:
    :private-members:
-
-resow.utils.name_utils module
------------------------------
-**This module contains helper functions for wind and currents.**
-
-.. automodule:: resow.utils.name_utils
-   :members:
-   :private-members:
-
-resow.utils.print_utils module
-------------------------------
-**This module contains helper functions for wind and currents.**
-
-.. automodule:: resow.utils.print_utils
-   :members:
-   :private-members:
-
 
 * :ref:`genindex`

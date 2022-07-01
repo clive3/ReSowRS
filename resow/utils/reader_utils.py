@@ -1,4 +1,4 @@
-
+#!/usr/bin/env python
 import configparser
 
 
@@ -17,5 +17,3 @@ def readConfig(config_file_path):
     configuration.read(config_file_path)
 
     return configuration
-
-

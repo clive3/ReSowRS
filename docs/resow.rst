@@ -9,7 +9,7 @@ subpackages
 -----------
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    resow.utils
 

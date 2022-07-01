@@ -4,8 +4,8 @@ import zipfile
 
 from urllib.request import urlretrieve
 
-from resow.utils.print_utils import printProgress
-from resow.utils.name_utils import geotiffFileName, hansenFilePath
+from resow.utils.print_utils import _printProgress
+from resow.utils.name_utils import _geotiffFileName, _hansenFilePath
 
 
 def downloadMedianS2GEEImage(site_name, roi_polygon, date_pair, images_dir_path,
@@ -13,7 +13,7 @@ def downloadMedianS2GEEImage(site_name, roi_polygon, date_pair, images_dir_path,
                              MAX_CLOUD_PROBABILITY):
 
     ee.Initialize()
-    printProgress('connected to GEE')
+    _printProgress('connected to GEE')
 
     ee_region = ee.Geometry.Polygon(roi_polygon)
     date_start, date_end = date_pair[0], date_pair[1]
@@ -27,7 +27,7 @@ def downloadMedianS2GEEImage(site_name, roi_polygon, date_pair, images_dir_path,
     image_metadata = ee_image_median.getInfo()
     image_epsg = image_metadata['bands'][0]['crs'][5:]
 
-    image_filename = geotiffFileName(site_name, date_start, date_end, SCALE, MASK_LAND)
+    image_filename = _geotiffFileName(site_name, date_start, date_end, SCALE, MASK_LAND)
     DOWNLOAD_FILENAME = 'gee_image'
     download_filepath = os.path.join(images_dir_path, DOWNLOAD_FILENAME+'.tif')
     image_filepath = os.path.join(images_dir_path, image_filename)
@@ -45,9 +45,9 @@ def downloadMedianS2GEEImage(site_name, roi_polygon, date_pair, images_dir_path,
         os.remove(image_filepath)
         os.rename(download_filepath, image_filepath)
 
-    printProgress(f'median S2 composite from {number_images} images downloaded')
+    _printProgress(f'median S2 composite from {number_images} images downloaded')
 
-    hansen_filepath = hansenFilePath(images_dir_path, site_name)
+    hansen_filepath = _hansenFilePath(images_dir_path, site_name)
     downloadGEEImage(image=ee.Image('UMD/hansen/global_forest_change_2015')\
                            .reproject(crs=f'EPSG:{EPSG}', scale=ee_scale),
                      name=DOWNLOAD_FILENAME,
@@ -61,9 +61,9 @@ def downloadMedianS2GEEImage(site_name, roi_polygon, date_pair, images_dir_path,
     except:  # overwrite if already exists
         os.remove(hansen_filepath)
         os.rename(download_filepath, hansen_filepath)
-    printProgress('hansen2015 downloaded')
+    _printProgress('hansen2015 downloaded')
 
-    printProgress('GEE connection closed')
+    _printProgress('GEE connection closed')
 
     return number_images, image_epsg
 

@@ -8,8 +8,8 @@ from pyproj import transform, Proj
 from skimage.morphology import remove_small_objects, remove_small_holes, \
     disk, erosion
 
-from resow.utils.print_utils import printWarning, printError
-from resow.utils.name_utils import hansenFilePath, seaMaksFilePath
+from resow.utils.print_utils import _printWarning, _printError
+from resow.utils.name_utils import _hansenFilePath, _seaMaskFilePath
 
 
 def readGeotiff(image_file_path):
@@ -26,7 +26,7 @@ def readGeotiff(image_file_path):
             image_array_np = np.expand_dims(image_array_np, axis=0)
 
     else:
-        printWarning(f'image file could not be read: {image_file_path}')
+        _printWarning(f'image file could not be read: {image_file_path}')
         image_array_np = projection = geotransform = None
 
     return image_array_np, (projection, geotransform)
@@ -45,7 +45,7 @@ def writeGeotiff(image_array_np, output_file_path, image_geometry):
                               bands=num_bands, eType=gdal.GDT_Float32)
 
     if not output_ds:
-        printError(f'driver for file : {output_file_path} cannot be created')
+        _printError(f'driver for file : {output_file_path} cannot be created')
 
     else:
         output_ds.SetProjection(image_geometry[0])
@@ -60,7 +60,7 @@ def writeGeotiff(image_array_np, output_file_path, image_geometry):
                 output_ds.GetRasterBand(band + 1).WriteArray(image_array_np)
 
             else:
-                printWarning(f'cannot write the file: {output_file_path}')
+                _printWarning(f'cannot write the file: {output_file_path}')
 
         output_ds.FlushCache()
         output_ds = None
@@ -68,7 +68,7 @@ def writeGeotiff(image_array_np, output_file_path, image_geometry):
 
 def createSeaMask(median_dir_path, site_name, SMALL_OBJECT_SIZE):
 
-    hansen_np, geometry = readGeotiff(hansenFilePath(median_dir_path, site_name))
+    hansen_np, geometry = readGeotiff(_hansenFilePath(median_dir_path, site_name))
     hansen_np = np.squeeze(hansen_np)
 
     water_mask_np = np.where(hansen_np == 1, 0, 1)
@@ -79,7 +79,7 @@ def createSeaMask(median_dir_path, site_name, SMALL_OBJECT_SIZE):
 
     footprint = disk(100)
     water_mask_np = erosion(water_mask_np, footprint)
-    sea_mask_file_path = seaMaksFilePath(median_dir_path, site_name)
+    sea_mask_file_path = _seaMaskFilePath(median_dir_path, site_name)
     writeGeotiff(water_mask_np, sea_mask_file_path, geometry)
 
     land_mask_file_path = sea_mask_file_path.replace('sea', 'land')
@@ -88,7 +88,7 @@ def createSeaMask(median_dir_path, site_name, SMALL_OBJECT_SIZE):
 
 def applySeaMask(median_dir_path):
 
-    sea_mask_np, geometry = readGeotiff(os.path.join(seaMaksFilePath(median_dir_path)))
+    sea_mask_np, geometry = readGeotiff(os.path.join(_seaMaskFilePath(median_dir_path)))
 
 
 def polygon_from_geojson(hexgrid_filepath, OUTPUT_EPSG):
@@ -121,6 +121,6 @@ def polygon_from_geojson(hexgrid_filepath, OUTPUT_EPSG):
     polygon = f'POLYGON(({west} {north}, {west} {south} ,' + \
            f'{east} {south}, {east} {north}, {west} {north}))'
 
-    printError(polygon)
+    _printError(polygon)
 
     return polygon
