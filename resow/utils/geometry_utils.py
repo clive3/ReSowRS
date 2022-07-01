@@ -13,6 +13,14 @@ from resow.utils.name_utils import _hansenFilePath, _seaMaskFilePath
 
 
 def readGeotiff(image_file_path):
+    """Reads a geotiff and returns a numpy array and geometry information.
+
+    Args:
+        image_file_path:
+
+    Returns:
+
+    """
 
     ## import the input file and its geometry
     image_dataset_gdal = gdal.Open(image_file_path, gdal.GA_ReadOnly)
