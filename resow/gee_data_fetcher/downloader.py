@@ -16,9 +16,11 @@ def downloadMedianS2GEEImage(site_name, roi_polygon, date_pair, images_dir_path,
     """
 
     ee.Initialize()
-    _printProgress('connected to GEE')
+    _printProgress('... connected to GEE')
 
-    ee_region = ee.Geometry.Polygon(roi_polygon)
+# # ee.Geometry.Rectangle({coords: [-76.5, 2.0, -74, 4.0], geodesic: false})
+#    ee_region = ee.Geometry(roi_polygon)
+    ee_region = ee.Geometry.Polygon(coords=roi_polygon, proj='EPSG:4326')
     date_start, date_end = date_pair[0], date_pair[1]
     ee_scale = ee.Number(SCALE)
 
@@ -48,7 +50,7 @@ def downloadMedianS2GEEImage(site_name, roi_polygon, date_pair, images_dir_path,
         os.remove(image_filepath)
         os.rename(download_filepath, image_filepath)
 
-    _printProgress(f'median S2 composite from {number_images} images downloaded')
+    _printProgress(f'... median S2 composite from {number_images} images downloaded')
 
     hansen_filepath = _hansenFilePath(images_dir_path, site_name)
     downloadGEEImage(image=ee.Image('UMD/hansen/global_forest_change_2015')\
@@ -64,9 +66,9 @@ def downloadMedianS2GEEImage(site_name, roi_polygon, date_pair, images_dir_path,
     except:  # overwrite if already exists
         os.remove(hansen_filepath)
         os.rename(download_filepath, hansen_filepath)
-    _printProgress('hansen2015 downloaded')
+    _printProgress('... hansen2015 downloaded')
 
-    _printProgress('GEE connection closed')
+    _printProgress('... GEE connection closed')
 
     return number_images, image_epsg
 
@@ -89,8 +91,11 @@ def downloadGEEImage(image, name, ee_scale, ee_region, directory_path, bands):
 def getMedianGEEImage(ee_region, dates, EPSG, ee_scale, MASK_LAND,
                       NIR_LAND_THRESH, MAX_CLOUD_PROBABILITY):
 
+
+    _printProgress(f'... calculating median image')
+
     def maskClouds(ee_image_col):
-        clouds = ee.Image(ee_image_col.get('cloud_mask')).select('probability')
+        clouds = ee.Image(ee_image_col.get('S2SR_joined_cloudprob')).select('probability')
         is_not_cloud = clouds.lt(MAX_CLOUD_PROBABILITY)
         return ee_image_col.updateMask(is_not_cloud)
 
@@ -109,7 +114,7 @@ def getMedianGEEImage(ee_region, dates, EPSG, ee_scale, MASK_LAND,
         .filterDate(dates[0], dates[1])
 
     S2SR_cloud_masked_col = ee.ImageCollection(
-        ee.Join.saveFirst('cloud_mask')\
+        ee.Join.saveFirst('S2SR_joined_cloudprob')\
             .apply(**{'primary': S2SR_col,
             'secondary': S2_cloud_prob_col,
             'condition': ee.Filter.equals(**{
