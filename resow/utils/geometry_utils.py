@@ -69,6 +69,10 @@ def writeGeotiff(image_array_np, output_file_path, image_geometry):
 
 def createSeaMask(median_dir_path, site_name, SMALL_OBJECT_SIZE):
 
+    sea_mask_filepath = _seaMaskFilePath(median_dir_path, site_name)
+    if os.path.exists(sea_mask_filepath):
+        return False
+
     hansen_np, geometry = readGeotiff(_hansenFilePath(median_dir_path, site_name))
     hansen_np = np.squeeze(hansen_np)
 
@@ -80,11 +84,13 @@ def createSeaMask(median_dir_path, site_name, SMALL_OBJECT_SIZE):
 
     footprint = disk(100)
     water_mask_np = erosion(water_mask_np, footprint)
-    sea_mask_file_path = _seaMaskFilePath(median_dir_path, site_name)
-    writeGeotiff(water_mask_np, sea_mask_file_path, geometry)
 
-    land_mask_file_path = sea_mask_file_path.replace('sea', 'land')
+    writeGeotiff(water_mask_np, sea_mask_filepath, geometry)
+
+    land_mask_file_path = sea_mask_filepath.replace('sea', 'land')
     writeGeotiff(land_mask_np, land_mask_file_path, geometry)
+
+    return True
 
 
 def applySeaMask(median_dir_path):
