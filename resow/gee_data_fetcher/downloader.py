@@ -29,9 +29,6 @@ def downloadMedianS2GEEImage(site_name, roi_polygon, date_pair, images_dir_path,
                                                        MASK_LAND, NIR_LAND_THRESH,
                                                        MAX_CLOUD_PROBABILITY)
 
-    image_metadata = ee_image_median.getInfo()
-    image_epsg = image_metadata['bands'][0]['crs'][5:]
-
     image_filename = _geotiffFileName(site_name, date_start, date_end, SCALE, MASK_LAND)
     DOWNLOAD_FILENAME = 'gee_image'
     download_filepath = os.path.join(images_dir_path, DOWNLOAD_FILENAME+'.tif')
@@ -53,7 +50,7 @@ def downloadMedianS2GEEImage(site_name, roi_polygon, date_pair, images_dir_path,
     _printProgress(f'... median S2 composite from {number_images} images downloaded')
 
     metadata_filepath = image_filepath.replace('tif', 'txt')
-    _saveMetadata(metadata_filepath, date_pair, image_epsg, number_images)
+    _saveMetadata(metadata_filepath, date_pair, EPSG, number_images)
     _printProgress('... metadata saved')
 
     hansen_filepath = _hansenFilePath(images_dir_path, site_name)
