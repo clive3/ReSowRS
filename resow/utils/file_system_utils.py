@@ -1,4 +1,4 @@
-def saveMetadata(metadata_filepath, date_pair, image_epsg, median_number):
+def _saveMetadata(metadata_filepath, date_pair, image_epsg, median_number):
     """Saves metadata for the median composite image that has
      been downloaded from GEE in a .txt file.
 

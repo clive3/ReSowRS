@@ -6,8 +6,6 @@ import glob
 
 from resow.utils import reader_utils, geometry_utils
 from resow.utils.print_utils import _printError, _printProgress
-from resow.utils.file_system_utils import saveMetadata
-from resow.utils.name_utils import _geotiffFileName
 from resow.utils.geometry_utils import polygon_from_geojson
 
 from resow.cs_stuff import tools
@@ -84,14 +82,6 @@ class RESOWRS(object):
                                     site_name, roi_polygon, date_pair, images_dir_path,
                                     self.OUTPUT_EPSG, self.BANDS, self.SCALE, self.MASK_LAND,
                                     self.NIR_LAND_THRESH, self.MAX_CLOUD_PROBABILITY)
-
-                metadata_filename = _geotiffFileName(site_name, date_pair[0], date_pair[1],
-                                                     self.SCALE, self.MASK_LAND)
-                metadata_filename = metadata_filename.replace('tif', 'txt')
-                metadata_filepath = os.path.join(images_dir_path, metadata_filename)
-                saveMetadata(metadata_filepath, date_pair, image_epsg, median_number)
-
-                _printProgress('... metadata saved')
 
             if geometry_utils.createSeaMask(images_dir_path, site_name, self.SMALL_OBJECT_SIZE):
                 _printProgress('sea mask created')

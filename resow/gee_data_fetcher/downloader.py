@@ -1,11 +1,11 @@
 import os
 import ee
 import zipfile
-
 from urllib.request import urlretrieve
 
 from resow.utils.print_utils import _printProgress, _printError
 from resow.utils.name_utils import _geotiffFileName, _hansenFilePath
+from resow.utils.file_system_utils import _saveMetadata
 
 
 def downloadMedianS2GEEImage(site_name, roi_polygon, date_pair, images_dir_path,
@@ -51,6 +51,10 @@ def downloadMedianS2GEEImage(site_name, roi_polygon, date_pair, images_dir_path,
         os.rename(download_filepath, image_filepath)
 
     _printProgress(f'... median S2 composite from {number_images} images downloaded')
+
+    metadata_filepath = image_filepath.replace('tif', 'txt')
+    _saveMetadata(metadata_filepath, date_pair, image_epsg, number_images)
+    _printProgress('... metadata saved')
 
     hansen_filepath = _hansenFilePath(images_dir_path, site_name)
     downloadGEEImage(image=ee.Image('UMD/hansen/global_forest_change_2015')\
