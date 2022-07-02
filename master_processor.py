@@ -31,18 +31,18 @@ class RESOWRS(object):
         self.data_partition = self.configuration['PATHS']['data partition']
         self.DATES = ast.literal_eval(self.configuration['GEE']['DATES'])
         self.BANDS = ast.literal_eval(self.configuration['GEE']['BANDS'])
-        self.SCALE = int(self.configuration['GEE']['SCALE'])
-        self.MAX_CLOUD_PROBABILITY = self.configuration['GEE']['MAX_CLOUD_PROBABILITY']
-        self.NIR_LAND_THRESH = self.configuration['GEE']['NIR_LAND_THRESH']
-        self.MASK_LAND = self.configuration['GEE']['MASK_LAND']
-        self.SMALL_OBJECT_SIZE = self.configuration['GEE']['SMALL_OBJECT_SIZE']
-        self.OUTPUT_EPSG = self.configuration['MAPPING']['OUTPUT_EPSG']
+        self.SCALE = ast.literal_eval((self.configuration['GEE']['SCALE']))
+        self.MAX_CLOUD_PROBABILITY = ast.literal_eval(self.configuration['GEE']['MAX_CLOUD_PROBABILITY'])
+        self.NIR_LAND_THRESH = ast.literal_eval(self.configuration['GEE']['NIR_LAND_THRESH'])
+        self.MASK_LAND = ast.literal_eval(self.configuration['GEE']['MASK_LAND'])
+        self.SMALL_OBJECT_SIZE = ast.literal_eval(self.configuration['GEE']['SMALL_OBJECT_SIZE'])
+        self.OUTPUT_EPSG = ast.literal_eval(self.configuration['MAPPING']['OUTPUT_EPSG'])
 
     def run(self):
         """The run method to control all workflow.
         """
 
-        extension = 'kml'
+        extension = 'geojson'
 
         sites_dir_path = os.path.join(self.data_partition, 'sites')
         if os.path.exists(sites_dir_path):
@@ -57,7 +57,14 @@ class RESOWRS(object):
                 kml_polygon = tools.polygon_from_kml(site_filepath)
                 roi_polygon = tools.smallest_rectangle(kml_polygon)
             elif extension == 'geojson':
-                roi_polygon = polygon_from_geojson(site_filepath, self.OUTPUT_EPSG)
+                if 'hex' in site_filepath:
+                    roi_polygon = polygon_from_geojson(site_filepath, self.OUTPUT_EPSG)
+                else:
+                    import json
+                    f = open(site_filepath)
+                    roi_polygon = json.load(f)['features'][0]['geometry']['coordinates']
+                    roi_polygon = tools.smallest_rectangle(roi_polygon)
+
             else:
                 _printError(f'geometry type not recognised: {extension}')
 
