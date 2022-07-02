@@ -1,6 +1,6 @@
 import os
 import ee
-import zipfile
+from zipfile import ZipFile
 from urllib.request import urlretrieve
 
 from resow.utils.print_utils import _printProgress
@@ -38,8 +38,9 @@ def downloadMedianS2GEEImage(site_name, roi_polygon, date_pair, images_dir_path,
                      name=DOWNLOAD_FILENAME,
                      ee_scale=ee_scale,
                      ee_region=ee_region,
+                     bands=BANDS,
                      directory_path=images_dir_path,
-                     bands=BANDS)
+                    )
 
     try:
         os.rename(download_filepath, image_filepath)
@@ -59,8 +60,9 @@ def downloadMedianS2GEEImage(site_name, roi_polygon, date_pair, images_dir_path,
                      name=DOWNLOAD_FILENAME,
                      ee_scale=ee_scale,
                      ee_region=ee_region,
+                     bands='datamask',
                      directory_path=images_dir_path,
-                     bands='datamask')
+                    )
 
     try:
         os.rename(download_filepath, hansen_filepath)
@@ -72,7 +74,7 @@ def downloadMedianS2GEEImage(site_name, roi_polygon, date_pair, images_dir_path,
     _printProgress('... GEE connection closed')
 
 
-def downloadGEEImage(image, name, ee_scale, ee_region, directory_path, bands):
+def downloadGEEImage(image, name, ee_scale, ee_region, bands, directory_path):
 
     path = image.getDownloadURL({
         'name': name,
@@ -82,9 +84,9 @@ def downloadGEEImage(image, name, ee_scale, ee_region, directory_path, bands):
         'bands': bands
     })
 
-    local_zip, headers = urlretrieve(path)
-    with zipfile.ZipFile(local_zip) as local_zipfile:
-        return local_zipfile.extractall(path=str(directory_path))
+    image_zip_filepath, _ = urlretrieve(path)
+    with ZipFile(image_zip_filepath) as local_zipfile:
+        return local_zipfile.extractall(directory_path)
 
 
 def getMedianGEEImage(ee_region, dates, EPSG, ee_scale, MASK_LAND,

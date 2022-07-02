@@ -10,7 +10,7 @@ from resow.utils.geometry_utils import polygon_from_geojson
 
 from resow.cs_stuff import tools
 
-from resow.gee_data_fetcher import downloader
+from resow.gee_client import downloader
 
 
 class RESOWRS(object):
