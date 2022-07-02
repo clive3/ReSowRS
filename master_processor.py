@@ -77,7 +77,7 @@ class RESOWRS(object):
 
             for date_pair in self.DATES:
 
-                _printProgress(f'processing {site_name}: {date_pair}')
+                _printProgress(f'PROCESSING {site_name}: {date_pair}')
                 _printProgress('')
 
                 median_number, image_epsg = downloader.downloadMedianS2GEEImage(
@@ -91,11 +91,12 @@ class RESOWRS(object):
                 metadata_filepath = os.path.join(images_dir_path, metadata_filename)
                 saveMetadata(metadata_filepath, date_pair, image_epsg, median_number)
 
-                _printProgress('metadata saved')
+                _printProgress('... metadata saved')
 
-            geometry_utils.createSeaMask(images_dir_path, site_name, self.SMALL_OBJECT_SIZE)
+            if geometry_utils.createSeaMask(images_dir_path, site_name, self.SMALL_OBJECT_SIZE):
+                _printProgress('sea mask created')
 
-            _printProgress('sea mask created')
+            _printProgress('')
 
 
 if __name__ == '__main__':
