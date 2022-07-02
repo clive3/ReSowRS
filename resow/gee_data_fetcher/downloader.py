@@ -3,7 +3,7 @@ import ee
 import zipfile
 from urllib.request import urlretrieve
 
-from resow.utils.print_utils import _printProgress, _printError
+from resow.utils.print_utils import _printProgress
 from resow.utils.name_utils import _geotiffFileName, _hansenFilePath
 from resow.utils.file_system_utils import _saveMetadata
 
