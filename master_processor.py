@@ -78,15 +78,15 @@ class RESOWRS(object):
                 _printProgress(f'PROCESSING {site_name}: {date_pair}')
                 _printProgress('')
 
-                median_number, image_epsg = downloader.downloadMedianS2GEEImage(
+                downloader.downloadMedianS2GEEImage(
                                     site_name, roi_polygon, date_pair, images_dir_path,
                                     self.OUTPUT_EPSG, self.BANDS, self.SCALE, self.MASK_LAND,
                                     self.NIR_LAND_THRESH, self.MAX_CLOUD_PROBABILITY)
 
-            if geometry_utils.createSeaMask(images_dir_path, site_name, self.SMALL_OBJECT_SIZE):
-                _printProgress('sea mask created')
+                if geometry_utils.createSeaMask(images_dir_path, site_name, self.SMALL_OBJECT_SIZE):
+                    _printProgress('sea mask created')
 
-            _printProgress('')
+                _printProgress('')
 
 
 if __name__ == '__main__':
