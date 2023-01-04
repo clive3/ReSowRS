@@ -1,25 +1,23 @@
 import os
 import ee
+import numpy as np
 from zipfile import ZipFile
 from urllib.request import urlretrieve
 
-from resow.utils.print_utils import _printProgress
-from resow.utils.name_utils import _geotiffFileName, _hansenFilePath
-from resow.utils.file_system_utils import _saveMetadata
-
+from resow._utils.print_utils import _printProgress, _printError
+from resow._utils.name_utils import _geotiffFileName, _hansenFilePath
+from resow._utils.file_system_utils import _saveMetadata
+from resow.gee_client.gee import GEES2Downloader
 
 def downloadMedianS2GEEImage(site_name, roi_polygon, date_pair, images_dir_path,
                              EPSG, BANDS, SCALE, MASK_LAND, NIR_LAND_THRESH,
                              MAX_CLOUD_PROBABILITY):
-    """Connects to GEE and downloads a median composite image based on the
-    parameters.
+    """Connects to GEE and downloads a median composite image.
     """
 
     ee.Initialize()
     _printProgress('... connected to GEE')
 
-# # ee.Geometry.Rectangle({coords: [-76.5, 2.0, -74, 4.0], geodesic: false})
-#    ee_region = ee.Geometry(roi_polygon)
     ee_region = ee.Geometry.Polygon(coords=roi_polygon, proj='EPSG:4326')
     date_start, date_end = date_pair[0], date_pair[1]
     ee_scale = ee.Number(SCALE)
@@ -27,7 +25,7 @@ def downloadMedianS2GEEImage(site_name, roi_polygon, date_pair, images_dir_path,
     ee_image_median, number_images = getMedianGEEImage(ee_region, date_pair,
                                                        EPSG, ee_scale,
                                                        MASK_LAND, NIR_LAND_THRESH,
-                                                       MAX_CLOUD_PROBABILITY)
+                                                       MAX_CLOUD_PROBABILITY, BANDS)
 
     image_filename = _geotiffFileName(site_name, date_start, date_end, SCALE, MASK_LAND)
     DOWNLOAD_FILENAME = 'gee_image'
@@ -66,7 +64,7 @@ def downloadMedianS2GEEImage(site_name, roi_polygon, date_pair, images_dir_path,
 
     try:
         os.rename(download_filepath, hansen_filepath)
-    except:  # overwrite if already exists
+    except:
         os.remove(hansen_filepath)
         os.rename(download_filepath, hansen_filepath)
     _printProgress('... hansen2015 downloaded')
@@ -90,20 +88,20 @@ def downloadGEEImage(image, name, ee_scale, ee_region, bands, directory_path):
 
 
 def getMedianGEEImage(ee_region, dates, EPSG, ee_scale, MASK_LAND,
-                      NIR_LAND_THRESH, MAX_CLOUD_PROBABILITY):
+                      NIR_LAND_THRESH, MAX_CLOUD_PROBABILITY, BANDS):
 
 
     _printProgress(f'... calculating median image')
 
-    def maskClouds(ee_image_col):
-        clouds = ee.Image(ee_image_col.get('S2SR_joined_cloudprob')).select('probability')
+    def maskClouds(ee_image):
+        clouds = ee.Image(ee_image.get('S2SR_joined_cloudprob')).select('probability')
         is_not_cloud = clouds.lt(MAX_CLOUD_PROBABILITY)
-        return ee_image_col.updateMask(is_not_cloud)
+        return ee_image.updateMask(is_not_cloud)
 
-    def maskLand(ee_image_col):
-        NIR = ee.Image(ee_image_col.select('B8'))
+    def maskLand(ee_image):
+        NIR = ee.Image(ee_image.select('B8'))
         is_not_land = NIR.lt(NIR_LAND_THRESH*1000)
-        return ee_image_col.updateMask(is_not_land)
+        return ee_image.updateMask(is_not_land)
 
     S2SR_col = ee.ImageCollection('COPERNICUS/S2_SR')\
                                    .filterBounds(ee_region)\
@@ -123,13 +121,54 @@ def getMedianGEEImage(ee_region, dates, EPSG, ee_scale, MASK_LAND,
             'rightField': 'system:index'})})).map(maskClouds)
 
     image_list = S2SR_cloud_masked_col.toList(500)
-
     number_images = len(image_list.getInfo())
 
-    if MASK_LAND:
-        S2SR_cloud_masked_col = S2SR_cloud_masked_col.map(maskLand)
+ #   if MASK_LAND:
+ #       S2SR_cloud_masked_col = S2SR_cloud_masked_col.map(maskLand)
 
     image_median = S2SR_cloud_masked_col.median() \
         .reproject(crs=f'EPSG:{EPSG}', scale=ee_scale)
 
+
     return image_median, number_images
+
+
+def test():
+    """xmin = ee.Number(270000)
+    ymin = ee.Number(330000)
+    xmax = ee.Number(220000)
+    ymax = ee.Number(380000)
+
+    bl = ee.Geometry.Point([xmin, ymin])
+    br = ee.Geometry.Point([xmax, ymin])
+    tl = ee.Geometry.Point([xmin, ymax])
+    tr = ee.Geometry.Point([xmax, ymax])
+
+    bgs = ee.Projection('EPSG:27700')
+
+    bbox_coords = ee.List([bl, br, tr, tl, bl])
+    ee_region = ee.Geometry.Polygon(coords=bbox_coords, proj=bgs, evenOdd=False)
+
+    ee_region = ee.Geometry.Rectangle(coords=[-76.5, 2.0, -74, 4.0], geodesic=False)"""
+
+#    ee_region = ee.Geometry(roi_polygon)
+
+    aoi = ee.Geometry.Point([-6, 49.9])
+    aoi = ee.Geometry.Point([-5.09, 53.07])
+    S2SR_col = ee.ImageCollection('COPERNICUS/S2_SR')\
+                                   .filterBounds(aoi)\
+                                   .filterDate(date_start, date_end)\
+                                   .select(BANDS)
+
+    ee_col_list = S2SR_col.toList(S2SR_col.size())
+    coll_size = ee_col_list.size().getInfo()
+    for band in BANDS:
+        for i in range(coll_size):
+#            image = ee.Image(ee_col_list.get(i)).reproject(crs=f'EPSG:{EPSG}', scale=ee_scale)
+            image = ee.Image(ee_col_list.get(i))
+            timedate_str = image.get('DATATAKE_IDENTIFIER').getInfo()[5:20]
+            print(timedate_str)
+            downloader = GEES2Downloader()
+            downloader.download(img=image, band=band, scale=SCALE)
+            np.save(f'd://data//resowrs//test2//{band}_{timedate_str}.npy', downloader.array)
+    _printError('done')

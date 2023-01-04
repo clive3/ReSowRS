@@ -5,12 +5,10 @@ import numpy as np
 from osgeo import gdal
 from geopandas import read_file
 from pyproj import Proj
-from shapely import geometry
-from skimage.morphology import remove_small_objects, remove_small_holes, \
-    disk, erosion
 
-from resow.utils.print_utils import _printWarning, _printError
-from resow.utils.name_utils import _hansenFilePath, _seaMaskFilePath
+
+from resow._utils.print_utils import printWarning, printError
+from resow._utils.name_utils import _hansenFilePath, _seaMaskFilePath
 
 
 def readGeotiff(image_file_path):
@@ -27,7 +25,7 @@ def readGeotiff(image_file_path):
             image_array_np = np.expand_dims(image_array_np, axis=0)
 
     else:
-        _printWarning(f'image file could not be read: {image_file_path}')
+        printWarning(f'image file could not be read: {image_file_path}')
         image_array_np = projection = geotransform = None
 
     return image_array_np, (projection, geotransform)
@@ -46,7 +44,7 @@ def writeGeotiff(image_array_np, output_file_path, image_geometry):
                               bands=num_bands, eType=gdal.GDT_Float32)
 
     if not output_ds:
-        _printError(f'driver for file : {output_file_path} cannot be created')
+        printError(f'driver for file : {output_file_path} cannot be created')
 
     else:
         output_ds.SetProjection(image_geometry[0])
@@ -61,13 +59,13 @@ def writeGeotiff(image_array_np, output_file_path, image_geometry):
                 output_ds.GetRasterBand(band + 1).WriteArray(image_array_np)
 
             else:
-                _printWarning(f'cannot write the file: {output_file_path}')
+                printWarning(f'cannot write the file: {output_file_path}')
 
         output_ds.FlushCache()
         output_ds = None
 
 
-def createSeaMask(median_dir_path, site_name, SMALL_OBJECT_SIZE):
+"""def createSeaMask(median_dir_path, site_name, SMALL_OBJECT_SIZE):
 
     sea_mask_filepath = _seaMaskFilePath(median_dir_path, site_name)
     if os.path.exists(sea_mask_filepath):
@@ -90,7 +88,7 @@ def createSeaMask(median_dir_path, site_name, SMALL_OBJECT_SIZE):
     land_mask_file_path = sea_mask_filepath.replace('sea', 'land')
     writeGeotiff(land_mask_np, land_mask_file_path, geometry)
 
-    return True
+    return True"""
 
 
 def applySeaMask(median_dir_path):

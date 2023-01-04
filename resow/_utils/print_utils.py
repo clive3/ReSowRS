@@ -2,12 +2,12 @@
 import sys
 
 
-def _printProgress(message):
+def printProgress(message):
 
     print(f'progress  >>>  {message}')
 
 
-def _printWarning(message):
+def printWarning(message):
         
     print('*******')
     # print (f'warning   \u26A0  {message}')
@@ -15,7 +15,7 @@ def _printWarning(message):
     print('*******')
         
         
-def _printError(message):
+def printError(message):
         
     print('*******')
     # print (f'ERROR     \u2620  {message}')

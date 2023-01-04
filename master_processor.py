@@ -3,10 +3,11 @@ import os
 import sys
 import ast
 import glob
+import configparser
 
-from resow.utils import reader_utils, geometry_utils
-from resow.utils.print_utils import _printError, _printProgress
-from resow.utils.geometry_utils import polygon_from_geojson
+from resow._utils import geometry_utils
+from resow._utils.print_utils import _printError, _printProgress
+from resow._utils.geometry_utils import polygon_from_geojson
 
 from resow.cs_stuff import tools
 
@@ -24,17 +25,21 @@ class RESOWRS(object):
         :type config_file: ``str``
         """
 
-        self.configuration = reader_utils.readConfig(config_file)
+        configuration = configparser.ConfigParser()
+        configuration.read(config_file)
 
-        self.data_partition = self.configuration['PATHS']['data partition']
-        self.DATES = ast.literal_eval(self.configuration['GEE']['DATES'])
-        self.BANDS = ast.literal_eval(self.configuration['GEE']['BANDS'])
-        self.SCALE = ast.literal_eval((self.configuration['GEE']['SCALE']))
-        self.MAX_CLOUD_PROBABILITY = ast.literal_eval(self.configuration['GEE']['MAX_CLOUD_PROBABILITY'])
-        self.NIR_LAND_THRESH = ast.literal_eval(self.configuration['GEE']['NIR_LAND_THRESH'])
-        self.MASK_LAND = ast.literal_eval(self.configuration['GEE']['MASK_LAND'])
-        self.SMALL_OBJECT_SIZE = ast.literal_eval(self.configuration['GEE']['SMALL_OBJECT_SIZE'])
-        self.OUTPUT_EPSG = ast.literal_eval(self.configuration['MAPPING']['OUTPUT_EPSG'])
+        self.data_partition = configuration['PATHS']['data partition']
+        self.DATES = ast.literal_eval(configuration['GEE']['DATES'])
+        self.BANDS = ast.literal_eval(configuration['GEE']['BANDS'])
+        self.SCALE = ast.literal_eval((configuration['GEE']['SCALE']))
+        self.MAX_CLOUD_PROBABILITY = ast.literal_eval(configuration['GEE']['MAX_CLOUD_PROBABILITY'])
+        self.NIR_LAND_THRESH = ast.literal_eval(configuration['GEE']['NIR_LAND_THRESH'])
+        self.MASK_LAND = ast.literal_eval(configuration['GEE']['MASK_LAND'])
+        self.SMALL_OBJECT_SIZE = ast.literal_eval(configuration['GEE']['SMALL_OBJECT_SIZE'])
+        self.OUTPUT_EPSG = ast.literal_eval(configuration['MAPPING']['OUTPUT_EPSG'])
+
+        self.PATHS = configuration['PATHS']
+
 
     def run(self):
         """The run method to control all workflow.
@@ -83,8 +88,8 @@ class RESOWRS(object):
                                     self.OUTPUT_EPSG, self.BANDS, self.SCALE, self.MASK_LAND,
                                     self.NIR_LAND_THRESH, self.MAX_CLOUD_PROBABILITY)
 
-                if geometry_utils.createSeaMask(images_dir_path, site_name, self.SMALL_OBJECT_SIZE):
-                    _printProgress('sea mask created')
+#                if geometry_utils.createSeaMask(images_dir_path, site_name, self.SMALL_OBJECT_SIZE):
+#                    _printProgress('sea mask created')
 
                 _printProgress('')
 
